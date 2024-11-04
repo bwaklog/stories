@@ -1,28 +1,22 @@
-import express from 'express';
+import express, { json } from 'express';
 import cors from 'cors';
+import config from './app/config/config.mjs';
+import connect from './app/database/connect.mjs';
+import router from './app/routes/routes.mjs';
 
-const PORT = process.env.PORT || 3001;
+// Connect to MongoDB
+// connect.initaliseClient();
 
-// Express JS backend setup
+console.log("[CONN] Attempting to ping MongoDB");
+await connect.initaliseClient();
+
 const app = express();
 app.use(express.json())
-// app.use(cors());
+app.use(express.urlencoded({ extended: true }))
+app.use(cors());
 
-// NOTE: Add middleware code here
+app.use("/", router);
 
-
-// NOTE: Define endpoints here
-app.get('/ping', (req, resp) => {
-  console.log(`[PING] Request url: `, req.ip);
-  resp.send('<p style="font-family: monospace">Pong UWU</p>');
-})
-
-app.post("/ping", (req, resp) => {
-  var reqBody = req.body;
-  console.log(`[PING][POST] Request: ${reqBody}`);
-  resp.send(reqBody);
-})
-
-app.listen(PORT, () => {
-  console.log(`listening on port ${PORT}`)
+app.listen(config.app.port, () => {
+  console.log(`listening on port ${config.app.port}`)
 })
