@@ -12,5 +12,8 @@ export default {
         password: process.env.DB_PASSWORD,
         cluster: process.env.CLUSTER_NAME,
         appName: process.env.APP_NAME,
+    },
+    "jwt" : {
+        jwtSecret: process.env.JWT_SECRET,
     }
 }
