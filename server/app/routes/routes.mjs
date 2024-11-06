@@ -1,5 +1,8 @@
 import express from "express";
 import connect from "../database/connect.mjs";
+import { checkSchema, validationResult } from "express-validator";
+import schema from "./schema.mjs";
+import { ObjectId } from "mongodb";
 
 const router = express.Router();
 
@@ -14,32 +17,85 @@ router.get("/ping", async (req, resp) => {
     }
     let updatedPing = await collections.findOne({ ip: req.ip });
     pong_resp == null ?
-        resp.status(500).send(`<p style="font-family: monospace">XoX</p>`) :
-        resp.status(200).send(`<p style="font-family: monospace">PONG: ${JSON.stringify(updatedPing)}</p>`);
+        resp.status(500).send(`XoX`) :
+        // JSON.stringify(updatedPing)
+        resp.status(200).send(`${JSON.stringify({
+            type: "ping",
+            response: "pong",
+            pings: updatedPing.pingCount,
+            ip: updatedPing.ip,
+        })}`);
 })
 
 // User registeration
-router.post("/register/user", async (req, resp) => {
-    // { username, password, email, dob, bio, profilePicURL }
-    // username would be unique hence we can use it as an identifier
-    // curl --json '{"username": "testuser", "password": "abc", "email": "testuser@abc", "dob": "01-01-2000", "bio": "test bio", "profilePicURL": "https://test.com"}' -X POST http://localhost:3000/register/user
+router.post(
+    "/register/user", 
+    checkSchema(schema.newUserSchemaRequest),
+    async (req, resp) => {
+    /*
+        curl --json '{                              \
+            "username": "foo",                      \ 
+            "password": "f846S@j",                  \
+            "email": "foo@gmail.com",               \
+        }'                                          \
+        -X POST http://localhost:3000/register/user \
+    */
+
+    // If invalid schema reject
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        resp.status(400).send({ errors: errors.array() });
+        return;
+    }
 
     let user = req.body;
     if (user === null) {
         resp.status(400).send({ error: "Invalid request" });
         return;
     }
+    const query = { username: user.username };
+    let collections = connect.db.collection("users");
+    let result = await collections.findOne(query);
 
-    // check for existing user
-    let exists = await connect.doesUserExist(user.username);
-
-    if (exists) {
-        resp.status(400).send({ error: "User already exists" });
+    if (result) {
+        resp.status(400).send({ 
+            message: "User already exists", 
+            user: {
+                _id: result._id,
+                username: result.username,
+                email: result.email
+            } 
+        });
         return;
     } else {
         let collections = connect.db.collection("users");
-        await collections.insertOne(user);
-        resp.status(201).send({ message: "User created" });
+        await collections.insertOne({
+            username: user.username,
+            email: user.email,
+            password: user.password,
+            account_info: {
+                followers: [],
+                following: [],
+                stories: []
+            }
+        });
+
+        let result = await collections.findOne({ username: user.username });
+        if (result) {
+            resp.status(200).send({ 
+                message: "User created",
+                user: {
+                    _id: result._id,
+                    username: result.username,
+                    email: result.email
+                }    
+            });
+        } else {
+            resp.status(500).send({ 
+                message: "User not created" 
+            });
+        }
+        return;
     }
 })
 
@@ -53,59 +109,8 @@ router.get('/users/', async (req, resp) => {
     }
 });
 
-// Fetch all stories
-router.get("/stories", async (req, resp) => {
-    let collections = connect.db.collection("stories");
-    let stories = await collections.find().toArray();
-    console.log(stories);
-    if (stories.length === 0) {
-        resp.status(404).send({ error: "Stories not found" });
-        return;
-    } else {
-        resp.status(200).send(stories);
-    }
-})
-
-router.get("/stories/:author", async (req, resp) => {
-    let author = req.params.author;
-    let collections = connect.db.collection("stories");
-    let stories = await collections.find({ $or: [{ "author": author }, { "co-authors": author }] }).toArray();
-    if (stories.length === 0) {
-        resp.status(404).send({ error: "Stories not found" });
-        return;
-    } else {
-        resp.status(200).send(stories);
-    }
-})
-
-// Fetch Story with ID and Author
-router.get("/stories/:author/:id", async (req, resp) => {
-    let id = req.params.id;
-    let author = req.params.author;
-    if (id === null || author === null) {
-        resp.status(400).send({ error: "Invalid request" });
-        return;
-    }
-
-    // check if an author exists
-    let exist = await connect.doesUserExist(author);
-    if (exist === false) {
-        resp.status(404).send({ error: "Author not found" });
-        return;
-    }
-    console.log(exist);
-
-    let collections = connect.db.collection("stories");
-    let story = await collections.findOne({ id: id, author: author });
-    if (story) {
-        resp.status(200).send(story);
-    } else {
-        resp.status(404).send({ error: "Story not found" });
-    }
-});
-
 /*
-each story has tags associated with it
+STORY SCHEMA:
 { 
     id: int, 
     author: string, 
@@ -118,6 +123,210 @@ each story has tags associated with it
     content 
 }
 */
+
+router.post("/stories", checkSchema(schema.newStorySchemaRequest), async (req, resp) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        resp.status(400).send({ errors: errors.array() });
+        return;
+    }
+
+    let story = req.body;
+    // check if author_id and author match in db
+    let collections = connect.db.collection("users");
+    let query = { _id: ObjectId.createFromHexString(story.author_id) };
+    let author = await collections.findOne(query);
+    if (!author) {
+        resp.status(400).send({ error: "Invalid author_id" });
+        return;
+    }
+    if (author.username !== story.author) {
+        resp.status(400).send({ error: "Author name does not match" });
+        return;
+    }
+
+    // check if co-authors match in db
+    if (story.co_authors) {
+        
+        // check if co-authors are valid
+        for (let co_author of story.co_authors) {
+            let query = { username: co_author };
+            let co_author_result = await collections.findOne(query);
+            if (!co_author_result) {
+                resp.status(400).send({ 
+                    error: "Invalid co-author",
+                    co_author: co_author
+                });
+                return;
+            }
+        }
+    }
+
+    let story_collection = connect.db.collection("stories");
+
+    // check if an existing story with the same title exists
+    let existing_story = await story_collection.findOne({ 
+        "author": story.author,
+        "metadata.title": story.title
+     });
+    if (existing_story) {
+        resp.status(400).send({ 
+            error: `Story with same title exists for author ${story.author}` 
+        });
+        return;
+    }
+
+    // create a story
+    let result = await story_collection.insertOne({
+        author: story.author,
+        co_authors: story.co_authors,
+        metadata: {
+            title: story.title,
+            tags: story.tags,
+            draft: story.draft
+        },
+        content: story.content
+    })
+    if (result) {
+        resp.status(200).send({ 
+            message: "Story created",
+            result: result
+        });
+        return;
+    } else {
+        resp.status(500).send({ message: "Story not created" });
+        return;
+    }
+})
+
+// Fetch all stories
+router.get("/stories", async (req, resp) => {
+
+    /*
+        API design
+            - Get by query author : /stories?author=authorname
+            - Get by query id : /stories?id=storyid
+            - Get by query tag : /stories?tag=tagname
+    */
+
+    if (req.query.author) {
+        let author = req.query.author;
+        let collections = connect.db.collection("stories");
+        let stories = await collections.find({
+            $or: [
+                { "author": author }, { "co-authors": author }
+            ]
+        }).toArray();
+
+        if (stories.length === 0) {
+            resp.status(404).send({ error: "Stories not found" });
+            return;
+        } else {
+            let filteredStories = stories.map(story => ({
+                id: story.id,
+                author: story.author,
+                metadata: story.metadata,
+                content: story.content
+            }));
+            resp.status(200).send(filteredStories);
+            return;
+        }
+    }
+    if (req.query.id) {
+        console.log(req.query.id);
+        let id = req.query.id;
+        let collections = connect.db.collection("stories");
+        if (isNaN(parseInt(id))) {
+            resp.status(400).send({ error: "Invalid request" });
+            return
+        }
+        let story = await collections.findOne({"id": parseInt(id)});
+        console.log(story);
+        if (story) {
+            resp.status(200).send(JSON.stringify({
+                id: story.id,
+                author: story.author,
+                metadata: story.metadata,
+                content: story.content
+            }));
+            return;
+        } else {
+            resp.status(404).send({ error: "Story not found" });
+            return;
+        }
+    }
+
+    if (req.query.tag) {
+        let tag = req.query.tag;
+        let collections = connect.db.collection("stories");
+        let stories = await collections.find( { "metadata.tags": tag } ).toArray();
+        if (stories.length === 0) {
+            resp.status(404).send({ error: "Stories not found" });
+            return;
+        }
+        let filteredStories = stories.map(story => ({
+            id: story.id,
+            author: story.author,
+            metadata: story.metadata,
+            content: story.content
+        }));
+        resp.status(200).send(filteredStories);
+        return;
+    }
+
+    let collections = connect.db.collection("stories");
+    let stories = await collections.find().toArray();
+    console.log(stories);
+    if (stories.length === 0) {
+        resp.status(404).send({ error: "Stories not found" });
+        return;
+    } else {
+        resp.status(200).send(stories);
+    }
+})
+
+router.get("/authors", async (req, resp) => {
+    let collections = connect.db.collection("users");
+    
+})
+
+// Fetch Story with ID
+router.get("/stories/id/:id", async (req, resp) => {
+    let id = req.params.id;
+    if (id === null) {
+        resp.status(400).send({ error: "Invalid request" });
+        return;
+    }
+    let collections = connect.db.collection("stories");
+    let story = await collections.findOne({ id: id });
+    console.log(story);
+    resp.send(story);
+    // if (stories) {
+    //     resp.status(200).send(stories);
+    // } else {
+    //     resp.status(404).send({ error: "Story not found" });
+    // }
+});
+
+router.get("/stories/:id/authors", async (req, resp) => {
+    let story_id = req.params.id;
+    let collections = connect.db.collection("stories");
+    console.log(req.params);
+    let story = await collections.findOne({ "id": story_id });
+    console.log(story);
+    if (story) {
+        resp.status(200).send(JSON.stringify({
+            "author": story.author,
+            "co-authors": story["co-authors"]
+        }))
+    } else {
+        resp.status(400).send(JSON.stringify({
+            "message": "Story not found"
+        }))
+    }
+});
+
+
 router.get("/tags", async (req, resp) => {
     let collections = connect.db.collection("stories");
     let stories = await collections.find().toArray();
@@ -143,18 +352,6 @@ router.get("/tags/:tag", async (req, resp) => {
     let tag = req.params.tag;
     let collections = connect.db.collection("stories");
     let stories = await collections.find({ "metadata.tags": tag }).toArray();
-    if (stories.length === 0) {
-        resp.status(404).send({ error: "Stories not found" });
-    } else {
-        resp.status(200).send(stories);
-    }
-})
-
-// Fetch all stories by author
-router.get("/stories/:author", async (req, resp) => {
-    let author = req.params.author;
-    let collections = connect.db.collection("stories");
-    let stories = await collections.find({ author: author }).toArray();
     if (stories.length === 0) {
         resp.status(404).send({ error: "Stories not found" });
     } else {
