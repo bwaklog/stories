@@ -1,0 +1,79 @@
+.App {
+   text-align: center;
+   font-family: monospace;
+}
+
+.container {
+   display: flex;
+   justify-content: space-between;
+   margin-left: 10vw;
+   margin-right: 10vw;
+   padding-top: 2vh;
+   gap: 1vw;
+}
+
+button {
+   background-color: #2e7d32;
+   border-radius: 0.2rem;
+   border: none;
+   padding: 0.5rem;
+   color: white;
+   font-family: monospace;
+}
+
+button:hover {
+   cursor: pointer;
+}
+
+.left-sidebar {
+   display: flex;
+   flex-direction: column;
+   justify-content: space-between;
+   height: 90vh;
+   width: 15vw;
+   padding: 1vh 1vw;
+   position: fixed;
+   left: 10vw;
+   top: 2vh;
+   border: black solid 0.15rem;
+   border-radius: 0.25rem;
+}
+
+.right-sidebar {
+   display: flex;
+   flex-direction: column;
+   width: 15vw;
+   padding: 1vh 1vw;
+   height: fit-content;
+   position: fixed;
+   right: 10vw;
+   top: 2vh;
+   border: black solid 0.15rem;
+   border-radius: 0.25rem;
+}
+
+.nav {
+   display: flex;
+   flex-direction: column;
+   gap: 1vh;
+}
+
+.card-container {
+   flex-grow: 1;
+   margin-left: 16vw;
+   margin-right: 16vw;
+}
+
+.card-container div {
+   border: #8a7db3 solid 0.15rem;
+   border-radius: 0.25rem;
+   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2), 0 0.75rem 1.5rem rgba(0, 0, 0, 0.19);
+   padding: 1vh 1vw;
+   margin-bottom: 1vh;
+   transition: transform 0.2s ease;
+}
+
+.card-container div:hover {
+   cursor: pointer;
+   transform: scale(1.03);
+}
