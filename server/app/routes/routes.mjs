@@ -3,6 +3,8 @@ import connect from "../database/connect.mjs";
 import { checkSchema, validationResult } from "express-validator";
 import schema from "./schema.mjs";
 import { ObjectId } from "mongodb";
+import jwt from "jsonwebtoken";
+import config from "../config/config.mjs";
 
 const router = express.Router();
 
@@ -27,21 +29,93 @@ router.get("/ping", async (req, resp) => {
         })}`);
 })
 
+// Authentication
+
 // User registeration
 router.post(
-    "/register/user", 
+    "/register/user",
     checkSchema(schema.newUserSchemaRequest),
     async (req, resp) => {
-    /*
-        curl --json '{                              \
-            "username": "foo",                      \ 
-            "password": "f846S@j",                  \
-            "email": "foo@gmail.com",               \
-        }'                                          \
-        -X POST http://localhost:3000/register/user \
-    */
+        /*
+            curl --json '{                              \
+                "username": "foo",                      \ 
+                "password": "f846S@j",                  \
+                "email": "foo@gmail.com",               \
+            }'                                          \
+            -X POST http://localhost:3000/register/user \
+        */
 
-    // If invalid schema reject
+        // If invalid schema reject
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            resp.status(400).send({ errors: errors.array() });
+            return;
+        }
+
+        let user = req.body;
+        if (user === null) {
+            resp.status(400).send({ error: "Invalid request" });
+            return;
+        }
+        const query = { username: user.username };
+        let collections = connect.db.collection("users");
+        let result = await collections.findOne(query);
+
+        if (result) {
+            resp.status(400).send({
+                message: "User already exists",
+                user: {
+                    username: result.username,
+                }
+            });
+            return;
+        } else {
+            let collections = connect.db.collection("users");
+            await collections.insertOne({
+                username: user.username,
+                email: user.email,
+                password: user.password,
+                account_info: {
+                    followers: [],
+                    following: [],
+                    stories: []
+                }
+            });
+
+            let result = await collections.findOne({ username: user.username });
+            if (result) {
+
+                // creating a jwt
+                var token = jwt.sign({
+                    _id: result._id,
+                    username: result.username
+                }, config.jwt.jwtSecret);
+
+                resp.status(200).send({
+                    message: "User created",
+                    user: {
+                        jwt: token,
+                        username: result.username,
+                        email: result.email
+                    }
+                });
+            } else {
+                resp.status(500).send({
+                    message: "User not created"
+                });
+            }
+            return;
+        }
+    });
+
+router.post("/login", checkSchema(schema.userLoginSchema), async (req, resp) => {
+    /*
+    curl -X POST http://localhost:3000/login    \
+    --json '{                                   \
+        "username": "lando",                    \
+        "password": "abcdefgh"                  \
+    }'
+    */
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         resp.status(400).send({ errors: errors.array() });
@@ -49,55 +123,35 @@ router.post(
     }
 
     let user = req.body;
-    if (user === null) {
-        resp.status(400).send({ error: "Invalid request" });
-        return;
-    }
-    const query = { username: user.username };
     let collections = connect.db.collection("users");
-    let result = await collections.findOne(query);
+
+    let result = await collections.findOne({
+        username: user.username,
+        password: user.password
+    });
 
     if (result) {
-        resp.status(400).send({ 
-            message: "User already exists", 
+        var token = jwt.sign({
+            _id: result._id,
+            username: result.username
+        }, config.jwt.jwtSecret);
+        resp.status(200).send({
+            message: "User exists and logging in is allowed",
             user: {
-                _id: result._id,
+                jwt: token,
                 username: result.username,
                 email: result.email
-            } 
+            }
         });
         return;
     } else {
-        let collections = connect.db.collection("users");
-        await collections.insertOne({
-            username: user.username,
-            email: user.email,
-            password: user.password,
-            account_info: {
-                followers: [],
-                following: [],
-                stories: []
-            }
+        resp.status(404).send({
+            message: "User not found"
         });
-
-        let result = await collections.findOne({ username: user.username });
-        if (result) {
-            resp.status(200).send({ 
-                message: "User created",
-                user: {
-                    _id: result._id,
-                    username: result.username,
-                    email: result.email
-                }    
-            });
-        } else {
-            resp.status(500).send({ 
-                message: "User not created" 
-            });
-        }
         return;
     }
-})
+
+});
 
 router.get('/users/', async (req, resp) => {
     let collections = connect.db.collection("users");
@@ -108,21 +162,6 @@ router.get('/users/', async (req, resp) => {
         resp.status(200).send(users);
     }
 });
-
-/*
-STORY SCHEMA:
-{ 
-    id: int, 
-    author: string, 
-    co-authors: []string, 
-    metadata: {
-        title: string, 
-        tags: []string, 
-        published: bool
-    }, 
-    content 
-}
-*/
 
 router.post("/stories", checkSchema(schema.newStorySchemaRequest), async (req, resp) => {
     const errors = validationResult(req);
@@ -145,16 +184,16 @@ router.post("/stories", checkSchema(schema.newStorySchemaRequest), async (req, r
         return;
     }
 
-    // check if co-authors match in db
+    // check if co_authors match in db
     if (story.co_authors) {
-        
-        // check if co-authors are valid
+
+        // check if co_authors are valid
         for (let co_author of story.co_authors) {
             let query = { username: co_author };
             let co_author_result = await collections.findOne(query);
             if (!co_author_result) {
-                resp.status(400).send({ 
-                    error: "Invalid co-author",
+                resp.status(400).send({
+                    error: "Invalid co_author",
                     co_author: co_author
                 });
                 return;
@@ -165,13 +204,13 @@ router.post("/stories", checkSchema(schema.newStorySchemaRequest), async (req, r
     let story_collection = connect.db.collection("stories");
 
     // check if an existing story with the same title exists
-    let existing_story = await story_collection.findOne({ 
+    let existing_story = await story_collection.findOne({
         "author": story.author,
         "metadata.title": story.title
-     });
+    });
     if (existing_story) {
-        resp.status(400).send({ 
-            error: `Story with same title exists for author ${story.author}` 
+        resp.status(400).send({
+            error: `Story with same title exists for author ${story.author}`
         });
         return;
     }
@@ -188,7 +227,7 @@ router.post("/stories", checkSchema(schema.newStorySchemaRequest), async (req, r
         content: story.content
     })
     if (result) {
-        resp.status(200).send({ 
+        resp.status(200).send({
             message: "Story created",
             result: result
         });
@@ -214,7 +253,7 @@ router.get("/stories", async (req, resp) => {
         let collections = connect.db.collection("stories");
         let stories = await collections.find({
             $or: [
-                { "author": author }, { "co-authors": author }
+                { "author": author }, { "co_authors": author }
             ]
         }).toArray();
 
@@ -240,7 +279,7 @@ router.get("/stories", async (req, resp) => {
             resp.status(400).send({ error: "Invalid request" });
             return
         }
-        let story = await collections.findOne({"id": parseInt(id)});
+        let story = await collections.findOne({ "id": parseInt(id) });
         console.log(story);
         if (story) {
             resp.status(200).send(JSON.stringify({
@@ -259,7 +298,7 @@ router.get("/stories", async (req, resp) => {
     if (req.query.tag) {
         let tag = req.query.tag;
         let collections = connect.db.collection("stories");
-        let stories = await collections.find( { "metadata.tags": tag } ).toArray();
+        let stories = await collections.find({ "metadata.tags": tag }).toArray();
         if (stories.length === 0) {
             resp.status(404).send({ error: "Stories not found" });
             return;
@@ -287,7 +326,7 @@ router.get("/stories", async (req, resp) => {
 
 router.get("/authors", async (req, resp) => {
     let collections = connect.db.collection("users");
-    
+
 })
 
 // Fetch Story with ID
@@ -317,7 +356,7 @@ router.get("/stories/:id/authors", async (req, resp) => {
     if (story) {
         resp.status(200).send(JSON.stringify({
             "author": story.author,
-            "co-authors": story["co-authors"]
+            "co_authors": story["co_authors"]
         }))
     } else {
         resp.status(400).send(JSON.stringify({

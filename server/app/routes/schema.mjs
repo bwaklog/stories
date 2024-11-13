@@ -1,5 +1,15 @@
 import { query, validationResult } from "express-validator";
 
+/*
+SAMPLE CURL REQUEST
+
+curl -X POST http://localhost:4000/register/user \
+--json '{ 
+"username": "bar", 
+"email": "bar@gmail.com", 
+"password": "abcdefgh"
+}'
+*/
 const newUserSchemaRequest = {
     username: {
         notEmpty: true,
@@ -24,19 +34,39 @@ const newUserSchemaRequest = {
     }
 }
 
+const userLoginSchema = {
+    username: {
+        notEmpty: true,
+        isString: true,
+        isLength: {
+            options: { min: 3, max: 20 }
+        },
+        errorMessage: "Username must be between 3 and 20 characters"
+    },
+    password: {
+        notEmpty: true,
+        isString: true,
+        isLength: {
+            options: { min: 6 },
+            errorMessage: "Password must be atleast 6 characters"
+        },
+    }
+}
+
 /*
-curl -X POST http://localhost:4000/story \
+SAMPLE CURL REQUEST
+
+curl -X POST \
+http://localhost:4000/stories \
 --json '{
-  "author_id": "60d0fe4f5311236168a109ca",
-  "author": "John Doe",
-  "co_authors": ["Jane Doe", "Jim Beam"],
-  "content": "This is the content of the story.",
-  "title": "Sample Story Title",
-  "tags": ["fiction", "adventure"],
-  "draft": false
+"author_id": "672bc8f9412bdcefc00bc5fa",
+"author": "bar",
+"content": "This is some sample content",
+"title": "This is a title",
+"draft": false,
+"co_authors": ["foo"]
 }'
 */
-
 const newStorySchemaRequest = {
     // Validate author _id in MongoDB
     author_id: {
@@ -85,4 +115,4 @@ const newStorySchemaRequest = {
     },
 }
 
-export default { newUserSchemaRequest, newStorySchemaRequest };
+export default { newUserSchemaRequest, newStorySchemaRequest, userLoginSchema };
