@@ -173,32 +173,41 @@ router.post("/stories", checkSchema(schema.newStorySchemaRequest), async (req, r
     let story = req.body;
     // check if author_id and author match in db
     let collections = connect.db.collection("users");
-    let query = { _id: ObjectId.createFromHexString(story.author_id) };
-    let author = await collections.findOne(query);
-    if (!author) {
-        resp.status(400).send({ error: "Invalid author_id" });
-        return;
-    }
-    if (author.username !== story.author) {
-        resp.status(400).send({ error: "Author name does not match" });
-        return;
-    }
 
-    // check if co_authors match in db
-    if (story.co_authors) {
+    // getting _id from jwt
+    try {
+        var decoded = jwt.verify(story.jwt, config.jwt.jwtSecret);
+        var author_id = decoded._id;
+        let query = { _id: ObjectId.createFromHexString(author_id) };
+        let author = await collections.findOne(query);
+        if (!author) {
+            resp.status(400).send({ error: "Invalid author_id" });
+            return;
+        }
+        if (author.username !== story.author) {
+            resp.status(400).send({ error: "Author name does not match" });
+            return;
+        }
 
-        // check if co_authors are valid
-        for (let co_author of story.co_authors) {
-            let query = { username: co_author };
-            let co_author_result = await collections.findOne(query);
-            if (!co_author_result) {
-                resp.status(400).send({
-                    error: "Invalid co_author",
-                    co_author: co_author
-                });
-                return;
+        // check if co_authors match in db
+        if (story.co_authors) {
+
+            // check if co_authors are valid
+            for (let co_author of story.co_authors) {
+                let query = { username: co_author };
+                let co_author_result = await collections.findOne(query);
+                if (!co_author_result) {
+                    resp.status(400).send({
+                        error: "Invalid co_author",
+                        co_author: co_author
+                    });
+                    return;
+                }
             }
         }
+    } catch (error) {
+        resp.status(400).send({ error: "Invalid JWT" });
+        return;
     }
 
     let story_collection = connect.db.collection("stories");

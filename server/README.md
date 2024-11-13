@@ -23,13 +23,13 @@ http://localhost:<PORT>/login   \
 }'
 ```
 
-3. Create a story (Pending update)
+3. Create a story
 
 ```bash
 curl -X POST \
 http://localhost:<PORT>/stories \
 --json '{
-"author_id": "672bc8f9412bdcefc00bc5fa",
+"jwt": "jwt-token-of-the-user",
 "author": "bar",
 "content": "This is some sample content",
 "title": "This is a title",

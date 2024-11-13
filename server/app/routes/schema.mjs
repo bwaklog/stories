@@ -69,12 +69,13 @@ http://localhost:4000/stories \
 */
 const newStorySchemaRequest = {
     // Validate author _id in MongoDB
-    author_id: {
+    jwt: {
         notEmpty: true,
+        isString: true,
         isLength: {
-            options: { min: 24, max: 24 }
+            options: { min: 10 }
         },
-        errorMessage: "Invalid author_id"
+        errorMessage: "Invalid JWT"
     },
     author: {
         // Validate manually if author name matches in the database
