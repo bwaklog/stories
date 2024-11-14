@@ -1,3 +1,9 @@
+### Using nodemon for hot reload
+
+```bash
+npx nodemon ./index.mjs 
+```
+
 ### API Requests to backend
 
 1. Register a user
