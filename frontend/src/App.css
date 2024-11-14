@@ -65,8 +65,29 @@
 
 .inputPasswordContainer {
   display: flex;
-  align-items: center;
-  position: relative;
+  flex-direction: column;
+}
+
+.inputPasswordBox {
+  width: 100%;
+  padding-right: 30px;
+  padding-left: 10px;
+  box-sizing: border-box;
+}
+
+.eyeIcon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.errorLabel {
+  color: red;
+  font-size: 0.9em;
+  margin-top: 4px;
+  align-self: flex-start;
 }
 
 .inputPasswordBox {

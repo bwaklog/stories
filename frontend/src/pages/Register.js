@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
   const [email, setEmail] = useState("");
@@ -9,8 +10,9 @@ const Register = () => {
   const [usernameError, setUsernameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const navigate = useNavigate();
 
-  const onButtonClick = () => {
+  const onButtonClick = async () => {
     setEmailError("");
     setUsernameError("");
     setPasswordError("");
@@ -38,6 +40,23 @@ const Register = () => {
     if (password.length < 8) {
       setPasswordError("Password must be 8 characters or longer");
       return;
+    }
+
+    const response = await fetch("http://localhost:4000/register/user", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, username, password }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      localStorage.setItem("jwt", data.user.jwt);
+      navigate("/home", { state: { username: data.user.username } });
+    } else {
+      setPasswordError(data.message || "Registration failed");
     }
   };
 
@@ -80,7 +99,7 @@ const Register = () => {
           className="eyeIcon"
           onClick={() => setPasswordVisible(!passwordVisible)}
         >
-          {passwordVisible ? <FaEyeSlash /> : <FaEye />}{" "}
+          {passwordVisible ? <FaEyeSlash /> : <FaEye />}
         </div>
       </div>
       <br />

@@ -1,23 +1,25 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
-const Login = (props) => {
+const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [usernameError, setUsernameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const navigate = useNavigate();
 
-  const onButtonClick = () => {
+  const onButtonClick = async () => {
     setUsernameError("");
     setPasswordError("");
+
     if (username === "") {
       setUsernameError("Please enter your username");
       return;
     }
     if (!/^[a-zA-Z0-9_]*$/.test(username)) {
-      setUsernameError("Please enter valid username");
+      setUsernameError("Please enter a valid username");
       return;
     }
     if (password === "") {
@@ -29,56 +31,71 @@ const Login = (props) => {
       return;
     }
 
-    // Authentication code needs to be added here
+    const response = await fetch("http://localhost:4000/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, password }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      localStorage.setItem("jwt", data.user.jwt);
+      navigate("/home", { state: { username: data.user.username } });
+    } else {
+      setPasswordError(data.message || "Invalid username or password");
+    }
   };
 
   return (
-    <div className={"mainContainer"}>
-      <div className={"titleContainer"}>
+    <div className="mainContainer">
+      <div className="titleContainer">
         <div>Login</div>
       </div>
       <br />
-      <div className={"inputContainer"}>
+      <div className="inputContainer">
         <input
           value={username}
           placeholder="Username"
           onChange={(e) => setUsername(e.target.value)}
-          className={"inputBox"}
+          className="inputBox"
         />
         <label className="errorLabel">{usernameError}</label>
       </div>
       <br />
-      <div className={"inputPasswordContainer"}>
+      <div className="inputPasswordContainer" style={{ position: "relative" }}>
         <input
           type={passwordVisible ? "text" : "password"}
           value={password}
           placeholder="Password"
           onChange={(e) => setPassword(e.target.value)}
-          className={"inputPasswordBox"}
+          className="inputPasswordBox"
         />
+        <label className="errorLabel">{passwordError}</label>
         <div
           className="eyeIcon"
           onClick={() => setPasswordVisible(!passwordVisible)}
         >
           {passwordVisible ? <FaEyeSlash /> : <FaEye />}
         </div>
-        <label className="errorLabel">{passwordError}</label>
       </div>
       <br />
-      <div className={"inputContainer"}>
+      <div className="inputContainer">
         <input
-          className={"inputButton"}
+          className="inputButton"
           type="button"
           onClick={onButtonClick}
-          value={"Login"}
+          value="Login"
         />
       </div>
-      <div className={"registerationContainer"}>
+      <div className="registerationContainer">
         <div>
           Don't have an account?{" "}
-          <Link className={"registerLink"} to="/register">
+          <a className="registerLink" href="/register">
             Register
-          </Link>
+          </a>
         </div>
       </div>
     </div>

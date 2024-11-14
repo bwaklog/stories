@@ -77,3 +77,9 @@ button:hover {
    cursor: pointer;
    transform: scale(1.03);
 }
+
+.profile {
+      display: flex;
+      flex-direction: column;
+      gap: 1vh;
+   }
