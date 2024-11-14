@@ -1,0 +1,72 @@
+.sidebar {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: flex-start;
+   height: 90vh;
+   width: 15vw;
+   padding: 20px;
+   position: fixed;
+   left: 10vw;
+   top: 2vh;
+   border: 1px solid #e0e0e0;
+   border-radius: 10px;
+   background: #fafafa;
+   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+   transition: all 0.3s ease;
+}
+
+.sidebar h3 {
+   font-size: 1.5rem;
+   font-weight: 600;
+   color: #333;
+   margin-bottom: 20px;
+}
+
+.sidebar .share {
+   width: 100%;
+   padding: 12px;
+   background-color: #4caf50;
+   color: white;
+   text-align: center;
+   font-size: 1rem;
+   border-radius: 8px;
+   cursor: pointer;
+   transition: background-color 0.3s ease;
+}
+
+.sidebar .share:hover {
+   background-color: #388e3c;
+}
+
+.mde {
+   position: fixed;
+   top: 2vh;
+   right: 8vw;
+   width: 60vw;
+   height: 90vh;
+   border: none;
+   border-radius: 12px;
+   background-color: #ffffff;
+   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+   padding: 20px;
+   overflow: auto;
+   z-index: 10;
+   display: flex;
+   flex-direction: column;
+}
+
+.title-input {
+   margin-bottom: 20px;
+}
+
+.title-input label {
+   font-weight: bold;
+}
+
+.title-input input {
+   width: 100%;
+   padding: 8px;
+   font-size: 16px;
+   margin-top: 5px;
+}

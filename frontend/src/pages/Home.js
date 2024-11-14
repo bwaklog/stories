@@ -15,7 +15,7 @@ function LeftSideBar() {
         <button>Home</button>
         <button>Explore</button>
         <button>Search Stories</button>
-        <button>Write a story &#9998;</button>
+        <button onClick={() => window.location.href = "http://localhost:3000/story"}>Write a story &#9998;</button>
       </div>
       <div className="profile">
         <button>View Profile</button>
