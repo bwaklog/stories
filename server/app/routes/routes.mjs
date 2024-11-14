@@ -218,10 +218,35 @@ router.post("/stories", checkSchema(schema.newStorySchemaRequest), async (req, r
         "metadata.title": story.title
     });
     if (existing_story) {
-        resp.status(400).send({
-            error: `Story with same title exists for author ${story.author}`
-        });
-        return;
+        // resp.status(400).send({
+        //     error: `Story with same title exists for author ${story.author}`
+        // });
+
+        const updated_story = {
+            $set: {
+                co_authors: story.co_authors,
+                metadata: {
+                    title: story.title,
+                    tags: story.tags,
+                    draft: story.draft
+                },
+                content: story.content
+            }
+        }
+
+        const filter = { "author": story.author, "metadata.title": story.title };
+
+        let result = await story_collection.updateOne(filter, updated_story);
+        if (result) {
+            resp.status(200).send({
+                message: "Story updated",
+                result: result
+            });
+            return;
+        } else {
+            resp.status(400).send({ message: "Story not updated, bad request" });
+            return;
+        }
     }
 
     // create a story
