@@ -54,6 +54,7 @@ const Register = () => {
 
     if (response.ok) {
       localStorage.setItem("jwt", data.user.jwt);
+      localStorage.setItem("author", data.user.username);
       navigate("/home", { state: { username: data.user.username } });
     } else {
       setPasswordError(data.message || "Registration failed");

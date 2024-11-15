@@ -12,6 +12,7 @@ const MyEditor = ({ title }) => {
    
       const jwtToken = localStorage.getItem("jwt");
       console.log("JWT Token retrieved: ", jwtToken);
+      const author = localStorage.getItem("author");
    
       try {
          const response = await fetch("http://localhost:4000/stories", {
@@ -21,7 +22,7 @@ const MyEditor = ({ title }) => {
             },
             body: JSON.stringify({ 
                jwt: jwtToken,
-               author: "ameya",
+               author: author,
                content: markdownContent,
                title: title,
                draft: false, 
