@@ -1,6 +1,6 @@
 .App {
    text-align: center;
-   font-family: monospace;
+   font-family: 'Arial', sans-serif;
 }
 
 .container {
@@ -13,49 +13,50 @@
 }
 
 button {
-   background-color: #2e7d32;
-   border-radius: 0.2rem;
-   border: none;
-   padding: 0.5rem;
-   color: white;
-   font-family: monospace;
+   background-color: transparent;
+   border-radius: 0.25rem;
+   border: 1px solid #ccc;
+   padding: 0.75rem;
+   color: #333;
+   font-family: 'Arial', sans-serif;
+   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 button:hover {
    cursor: pointer;
+   background-color: #f5f5f5;
+   color: #000;
+   border-color: #999;
 }
 
-.left-sidebar {
-   display: flex;
-   flex-direction: column;
-   justify-content: space-between;
-   height: 90vh;
-   width: 15vw;
-   padding: 1vh 1vw;
-   position: fixed;
-   left: 10vw;
-   top: 2vh;
-   border: black solid 0.15rem;
-   border-radius: 0.25rem;
-}
-
+.left-sidebar,
 .right-sidebar {
    display: flex;
    flex-direction: column;
-   width: 15vw;
-   padding: 1vh 1vw;
-   height: fit-content;
+   padding: 2vh 2vw;
    position: fixed;
-   right: 10vw;
    top: 2vh;
-   border: black solid 0.15rem;
-   border-radius: 0.25rem;
+   border: 1px solid #e0e0e0;
+   border-radius: 0.5rem;
+   background: #fff;
+   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+   transition: box-shadow 0.3s ease;
+}
+
+.left-sidebar {
+   width: 15vw;
+   left: 10vw;
+}
+
+.right-sidebar {
+   width: 15vw;
+   right: 10vw;
 }
 
 .nav {
    display: flex;
    flex-direction: column;
-   gap: 1vh;
+   gap: 1.5vh;
 }
 
 .card-container {
@@ -65,21 +66,39 @@ button:hover {
 }
 
 .card-container div {
-   border: #8a7db3 solid 0.15rem;
-   border-radius: 0.25rem;
-   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2), 0 0.75rem 1.5rem rgba(0, 0, 0, 0.19);
-   padding: 1vh 1vw;
-   margin-bottom: 1vh;
-   transition: transform 0.2s ease;
+   border: 1px solid #e0e0e0;
+   border-radius: 0.5rem;
+   padding: 2vh 2vw;
+   margin-bottom: 2vh;
+   background: #fff;
+   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+   transition: transform 0.2s ease, box-shadow 0.3s ease;
 }
 
 .card-container div:hover {
    cursor: pointer;
-   transform: scale(1.03);
+   transform: scale(1.05);
+   box-shadow: 0 0.75rem 1.25rem rgba(0, 0, 0, 0.2);
 }
 
 .profile {
-      display: flex;
-      flex-direction: column;
-      gap: 1vh;
-   }
+   display: flex;
+   flex-direction: column;
+   gap: 2vh;
+   margin-top: 280px;
+}
+
+.profile button {
+   background-color: transparent;
+   padding: 1rem;
+   border-radius: 0.25rem;
+   border: 1px solid #ccc;
+   color: #333;
+   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.profile button:hover {
+   background-color: #f5f5f5;
+   color: #000;
+   border-color: #999;
+}

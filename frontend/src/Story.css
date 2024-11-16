@@ -1,33 +1,33 @@
 .sidebar {
    display: flex;
    flex-direction: column;
-   align-items: center;
+   align-items: flex-start;
    justify-content: flex-start;
    height: 90vh;
    width: 15vw;
    padding: 20px;
    position: fixed;
+   top: 5vh;
    left: 10vw;
-   top: 2vh;
-   border: 1px solid #e0e0e0;
-   border-radius: 10px;
-   background: #fafafa;
-   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-   transition: all 0.3s ease;
+   background: #fff;
+   border-radius: 8px;
+   border: 1px solid #ddd;
+   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .sidebar h3 {
-   font-size: 1.5rem;
+   font-size: 1.4rem;
    font-weight: 600;
    color: #333;
-   margin-bottom: 20px;
+   margin-bottom: 24px;
+   text-transform: capitalize;
 }
 
 .sidebar .share {
    width: 100%;
    padding: 12px;
-   background-color: #4caf50;
-   color: white;
+   background-color: #333;
+   color: #fff;
    text-align: center;
    font-size: 1rem;
    border-radius: 8px;
@@ -36,37 +36,70 @@
 }
 
 .sidebar .share:hover {
-   background-color: #388e3c;
+   background-color: #000;
 }
 
 .mde {
    position: fixed;
-   top: 2vh;
-   right: 8vw;
-   width: 60vw;
-   height: 90vh;
-   border: none;
+   top: 5vh;
+   right: 10vw;
+   width: 58vw;
+   height: 85vh;
    border-radius: 12px;
-   background-color: #ffffff;
-   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-   padding: 20px;
-   overflow: auto;
+   background-color: #fff;
+   padding: 24px;
+   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+   overflow-y: auto;
    z-index: 10;
    display: flex;
    flex-direction: column;
 }
 
 .title-input {
-   margin-bottom: 20px;
+   margin-bottom: 24px;
+   width: 100%;
 }
 
 .title-input label {
-   font-weight: bold;
+   font-size: 1rem;
+   font-weight: 500;
+   color: #333;
+   margin-bottom: 12px;
+   text-transform: capitalize;
+   display: block;
 }
 
 .title-input input {
    width: 100%;
-   padding: 8px;
-   font-size: 16px;
-   margin-top: 5px;
+   padding: 14px;
+   font-size: 1.1rem;
+   border-radius: 8px;
+   border: 1px solid #ddd;
+   background: #fafafa;
+   color: #333;
+   transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.title-input input:focus {
+   border-color: #333;
+   background-color: #fff;
+   outline: none;
+}
+
+.title-input input::placeholder {
+   color: #bbb;
+}
+
+.title-input .input-wrapper {
+   display: flex;
+   flex-direction: column;
+   gap: 10px;
+}
+
+.title-input h3 {
+   font-size: 1.8rem;
+   font-weight: 600;
+   color: #333;
+   margin-bottom: 20px;
+   text-align: center;
 }

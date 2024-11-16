@@ -40,6 +40,7 @@ const MyEditor = ({ title }) => {
       } catch (error) {
          console.log("Error: ", error);
       }
+      alert("Story saved successfully!");
    };
    
 
@@ -58,20 +59,21 @@ const MyEditor = ({ title }) => {
 }
 
 function SideBar({ title, setTitle }) {
-   return (
-      <div className="sidebar">
-         <button className="share">Share</button>
-         <h3>Project Settings</h3>
-         <label>Story Title</label>
-            <input 
-               required
-               type="text" 
-               value={title} 
-               onChange={(e) => setTitle(e.target.value)} 
-               placeholder="Enter story title"
-            />
+  return (
+    <div className="sidebar">
+      <button className="share">Share</button>
+      <div className="title-input">
+        <h3>Story Title</h3>
+        <input
+          required
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Enter story title"
+        />
       </div>
-   );
+    </div>
+  );
 }
 
 export default function Story() {
