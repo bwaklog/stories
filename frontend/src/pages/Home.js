@@ -5,6 +5,7 @@ const tags = ["Personal", "Adventure", "Fun", "Sad", "Happy", "Kid Friendly"];
 
 function handleLogout() {
   localStorage.removeItem("jwt");
+  localStorage.removeItem("author");
   window.location.href = "/";
 }
 
