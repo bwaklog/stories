@@ -1,29 +1,33 @@
 import "../Home.css";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const tags = ["Personal", "Adventure", "Fun", "Sad", "Happy", "Kid Friendly"];
 
 function handleLogout() {
-   localStorage.removeItem("jwt");
-   window.location.href = "/";
+  localStorage.removeItem("jwt");
+  window.location.href = "/";
 }
 
 function viewProfile() {
   window.location.href = "/profile";
 }
 
-function viewStory() {
-  window.location.href = '/viewStory';
+function viewStory(story) {
+  localStorage.setItem("storyData", JSON.stringify(story));
+  window.location.href = "/viewStory";
 }
 
 function LeftSideBar() {
   return (
     <div className="left-sidebar">
       <div className="nav">
-        <button>Home</button>
         <button>Explore</button>
         <button>Search Stories</button>
-        <button onClick={() => window.location.href = "http://localhost:3000/story"}>Write a story &#9998;</button>
+        <button
+          onClick={() => (window.location.href = "http://localhost:3000/story")}
+        >
+          Write a story &#9998;
+        </button>
       </div>
       <div className="profile">
         <button onClick={viewProfile}>View Profile</button>
@@ -49,22 +53,36 @@ function RightSideBar() {
 }
 
 function MainContent() {
+  const [stories, setStories] = useState([]);
+
+  useEffect(() => {
+    const fetchStories = async () => {
+      try {
+        const response = await fetch("http://localhost:4000/stories");
+        const story = await response.json();
+        setStories(story);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchStories();
+  }, []);
+
   return (
-    <div className="card-container" onClick={viewStory}>
-      {[...Array(6)].map((_, index) => (
-        <div key={index}>
-          <h3>Heading</h3>
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat. Duis aute irure dolor in
-            reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-            culpa qui officia deserunt mollit anim id est laborum.
-          </p>
-        </div>
-      ))}
+    <div className="card-container">
+      {stories.length > 0 ? (
+        stories.map((story, index) => (
+          <div key={index} onClick={() => viewStory(story)}>
+            <h3>{story.title}</h3>
+            <p>
+              <strong>Author: </strong> {story.author}
+            </p>
+            <p>{story.content}</p>
+          </div>
+        ))
+      ) : (
+        <p>Loading stories...</p>
+      )}
     </div>
   );
 }

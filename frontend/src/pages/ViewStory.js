@@ -11,37 +11,25 @@ const ViewStory = () => {
     window.location.href = "/profile";
   };
 
+  const storyData = JSON.parse(localStorage.getItem("storyData"));
+
   return (
     <div className="view-story">
       <div className="story-header">
         <button className="back-button" onClick={handleBack}>
           <FaArrowLeft size={24} />
         </button>
-        <h1>Heading</h1>
+        <h1>{storyData.title}</h1>
         <button className="profile-button" onClick={openProfile}>
           <FaUserCircle size={32} />
         </button>
       </div>
       <div className="story-details">
-        <h2>Author</h2>
+        <h2>{storyData.title}need to figure out tittle code</h2>
+        <h3 className="author-heading">Written By: {storyData.author}</h3>
       </div>
       <div className="story-content">
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-          culpa qui officia deserunt mollit anim id est laborum.Lorem ipsum
-          dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
-          incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-          commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
-          velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
-          occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-          mollit anim id est laborum.
-        </p>
+        <p>{storyData.content}</p>
       </div>
     </div>
   );

@@ -42,9 +42,15 @@
 
 .story-details {
     text-align: center;
-    margin-bottom: 30px;
-    padding-bottom: 30px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
     border-bottom: 2px solid #ddd;
+}
+
+.story-details .author-heading {
+    text-align: left;
+    margin-left: 30px;
+    margin-bottom: 0;
 }
 
 .story-details h1 {
@@ -75,8 +81,10 @@
     line-height: 1.8;
     color: #555;
     margin-bottom: 20px;
+    margin-top: 0;
 }
 
 .story-content p:last-child {
     margin-bottom: 0;
 }
+
