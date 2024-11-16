@@ -69,13 +69,62 @@ http://localhost:4000/stories \
 */
 const newStorySchemaRequest = {
     // Validate author _id in MongoDB
-    jwt: {
+    // jwt: {
+    //     notEmpty: true,
+    //     isString: true,
+    //     isLength: {
+    //         options: { min: 10 }
+    //     },
+    //     errorMessage: "Invalid JWT"
+    // },
+    author: {
+        // Validate manually if author name matches in the database
+        // for the given author id
         notEmpty: true,
         isString: true,
         isLength: {
-            options: { min: 10 }
+            options: { min: 3, max: 20 }
         },
-        errorMessage: "Invalid JWT"
+        errorMessage: "Author must be between 3 and 20 characters"
+    },
+    co_authors: {
+        optional: true,
+        isArray: true,
+        errorMessage: "Co-authors must be an array"
+    },
+    content: {
+        notEmpty: false,
+        isString: true,
+        errorMessage: "Content must be at least 10 characters"
+    },
+    title: {
+        notEmpty: true,
+        isString: true,
+        isLength: {
+            options: { min: 3, max: 50 }
+        },
+        errorMessage: "Title must be between 3 and 50 characters"
+    },
+    tags: {
+        optional: true,
+        isArray: true,
+        errorMessage: "Tags must be an array"
+    },
+    draft: {
+        isBoolean: true,
+        errorMessage: "Draft must be a boolean"
+    },
+}
+
+const updateStoryRequest = {
+    // Validate author _id in MongoDB
+    id: {
+        notEmpty: true,
+        isString: true,
+        isLength: {
+            options: { min: 24, max: 24 }
+        },
+        errorMessage: "Invalid story id"
     },
     author: {
         // Validate manually if author name matches in the database
@@ -116,4 +165,4 @@ const newStorySchemaRequest = {
     },
 }
 
-export default { newUserSchemaRequest, newStorySchemaRequest, userLoginSchema };
+export default { newUserSchemaRequest, newStorySchemaRequest, userLoginSchema, updateStoryRequest };

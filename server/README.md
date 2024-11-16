@@ -34,8 +34,9 @@ http://localhost:<PORT>/login   \
 ```bash
 curl -X POST \
 http://localhost:<PORT>/stories \
---json '{
-"jwt": "jwt-token-of-the-user",
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer jwt-token-of-the-user' \
+--data '{
 "author": "bar",
 "content": "This is some sample content",
 "title": "This is a title",
@@ -44,30 +45,59 @@ http://localhost:<PORT>/stories \
 }'
 ```
 
-4. Get all stories or with filters
+4. Update a story 
+
+```bash
+curl -X PUT \
+http://localhost:<PORT>/stories \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer jwt-token-of-the-user' \
+--data '{
+"id": "story-id",
+"author": "bar",
+"content": "This is some sample content",
+"title": "This is a title",
+"draft": false,
+"co_authors": ["foo"]
+}'
+```
+
+5. Get all stories or with filters
 
 ```bash
 # get all stories
-curl -X GET http://localhost:<PORT>/stories
+curl -X GET \
+--header 'Authorization: Bearer jwt-token-of-the-user' \
+http://localhost:<PORT>/stories \
 
 # get all stories who has an author/co-author named authorname
-curl -X GET http://localhost:<PORT>/stories?author=authorname
+curl -X GET \
+--header 'Authorization: Bearer jwt-token-of-the-user' \
+http://localhost:<PORT>/stories?author=authorname
 
 # get story with story id as storyid
-curl -X GET http://localhost:<PORT>/stories?id=storyid
+curl -X GET \
+--header 'Authorization: Bearer jwt-token-of-the-user' \
+http://localhost:<PORT>/stories?id=storyid
 
 # get story with stories with tag as tagname
-curl -X GET http://localhost:<PORT>/stories?tag=tagname
+curl -X GET \
+--header 'Authorization: Bearer jwt-token-of-the-user' \
+http://localhost:<PORT>/stories?tag=tagname
 ```
 
-5. Get all stories with a certain tag (alternative)
+6. Get all stories with a certain tag (alternative)
 
 ```bash
 # Get different types of tags as a list of tags
-curl -X GET http://localhost:<PORT>/tags
+curl -X GET \
+--header 'Authorization: Bearer jwt-token-of-the-user' \
+http://localhost:<PORT>/tags
 
 # Get stories with tag tagname
-curl -X GET http://localhost:<PORT>/tags/tagname
+curl -X GET \
+--header 'Authorization: Bearer jwt-token-of-the-user' \
+http://localhost:<PORT>/tags/tagname
 ```
 
 ---

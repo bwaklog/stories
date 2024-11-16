@@ -5,8 +5,45 @@ import schema from "./schema.mjs";
 import { ObjectId } from "mongodb";
 import jwt from "jsonwebtoken";
 import config from "../config/config.mjs";
+import auth from "../middleware/auth.mjs";
 
 const router = express.Router();
+
+router.use(async (req, resp, next) => {
+  console.log(`Request received at ${new Date()} to ${req.url}`);
+  if (req.url != "/ping" && req.url != "/register/user" && req.url != "/login") {
+    // authorize the request
+    const auth_header = req.header("Authorization");
+    if (!auth_header) {
+      resp.status(401).send({ error: "Unauthorized" });
+      return;
+    }
+
+    // Authorization: Bearer <token>
+    var type = auth_header.split(" ")[0];
+    var token = auth_header.split(" ")[1];
+    console.log(`Token: ${token}`);
+    if (type !== "Bearer") {
+      resp.status(401).send({ error: "Unauthorized. Bad type for auth header" });
+    }
+    if (!token) {
+      resp.status(401).send({ error: "Unauthorized. Auth header type mentioned but no token" });
+      return;
+    }
+    try {
+      var decoded = await auth.verifyToken(token);
+      if (decoded === null) {
+        resp.status(401).send({ error: "Unauthorized" });
+        return;
+      }
+      console.log(`Decoded: ${JSON.stringify(decoded)}`);
+    } catch (error) {
+      resp.status(401).send({ error: "Unauthorized" });
+      return;
+    }
+  }
+  next();
+});
 
 router.get("/ping", async (req, resp) => {
   var pong_resp = await connect.attemptPing();
@@ -193,20 +230,9 @@ router.post("/stories", checkSchema(schema.newStorySchemaRequest), async (req, r
   let collections = connect.db.collection("users");
 
   // getting _id from jwt
-  try {
-    var decoded = jwt.verify(story.jwt, config.jwt.jwtSecret);
-    var author_id = decoded._id;
-    let query = { _id: ObjectId.createFromHexString(author_id) };
-    let author = await collections.findOne(query);
-    if (!author) {
-      resp.status(400).send({ error: "Invalid author_id" });
-      return;
-    }
-    if (author.username !== story.author) {
-      resp.status(400).send({ error: "Author name does not match" });
-      return;
-    }
-
+  let jwt = auth.extractTokenFromHeader(req.header("Authorization"));
+  let author = await auth.verifyToken(jwt);
+  if (author !== null) {
     // check if co_authors match in db
     if (story.co_authors) {
 
@@ -223,8 +249,8 @@ router.post("/stories", checkSchema(schema.newStorySchemaRequest), async (req, r
         }
       }
     }
-  } catch (error) {
-    resp.status(400).send({ error: "Invalid JWT" });
+  } else {
+    resp.status(400).send({ error: "Invalid JWT Parse" });
     return;
   }
 
@@ -232,39 +258,17 @@ router.post("/stories", checkSchema(schema.newStorySchemaRequest), async (req, r
 
   // check if an existing story with the same title exists
   let existing_story = await story_collection.findOne({
-    "author": story.author,
-    "metadata.title": story.title
+    "metadata.title": story.title,
+    $or: [
+      { "author": story.author },
+      { "co_authors": story.co_authors }
+    ]
   });
   if (existing_story) {
-    // resp.status(400).send({
-    //     error: `Story with same title exists for author ${story.author}`
-    // });
-
-    const updated_story = {
-      $set: {
-        co_authors: story.co_authors,
-        metadata: {
-          title: story.title,
-          tags: story.tags,
-          draft: story.draft
-        },
-        content: story.content
-      }
-    }
-
-    const filter = { "author": story.author, "metadata.title": story.title };
-
-    let result = await story_collection.updateOne(filter, updated_story);
-    if (result) {
-      resp.status(200).send({
-        message: "Story updated",
-        result: result
-      });
-      return;
-    } else {
-      resp.status(400).send({ message: "Story not updated, bad request" });
-      return;
-    }
+    resp.status(400).send({
+        error: `Story with same title exists for author ${story.author} with co_authors ${story.co_authors}`
+    });
+    return;
   }
 
   // create a story
@@ -290,6 +294,81 @@ router.post("/stories", checkSchema(schema.newStorySchemaRequest), async (req, r
   }
 })
 
+router.put("/stories", checkSchema(schema.updateStoryRequest), async (req, resp) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    resp.status(400).send({ errors: errors.array() });
+    return;
+  }
+
+  let jwt = auth.extractTokenFromHeader(req.header("Authorization"));
+  let author = await auth.verifyToken(jwt);
+  if (author === null) {
+    resp.status(400).send({ error: "Invalid JWT Parse" });
+    return;
+  }
+
+  let story = req.body;
+
+  // check if author is part of the story author or co_authors
+  let query = { 
+    _id: ObjectId.createFromHexString(story.id),
+    $or: [
+      { "author": author.username },
+      { "co_authors": author.username }
+    ]
+  };
+
+  let collections = connect.db.collection("stories");
+  let existing_story = await collections.findOne(query);
+  if (!existing_story) {
+    resp.status(400).send({ error: `Story not found, with id ${story.id} and author or co_author ${author.username}`});
+    return;
+  }
+
+  // verify co_authors
+  let user_collections = connect.db.collection("users");
+  if (story.co_authors) {
+    for (let co_author of story.co_authors) {
+      let co_author_query = { username: co_author };
+      let co_author_result = await user_collections.findOne(co_author_query);
+      if (!co_author_result) {
+        resp.status(400).send({
+          error: "Invalid co_author",
+          co_author: co_author
+        });
+        return;
+      }
+    }
+  }
+
+  const updated_story = {
+    $set: {
+      co_authors: story.co_authors,
+      metadata: {
+        title: story.title,
+        tags: story.tags,
+        draft: story.draft
+      },
+      content: story.content,
+    }
+  };
+
+  const filter = { "author": existing_story.author, _id: ObjectId.createFromHexString(story.id) };
+
+  let result = await collections.updateOne(filter, updated_story);
+  if (result) {
+    resp.status(200).send({
+      message: `Story updated by author ${author.username}`,
+      result: result
+    });
+    return;
+  } else {
+    resp.status(400).send({ message: "Story not updated, bad request" });
+    return;
+  }
+});
+
 // Fetch all stories
 router.get("/stories", async (req, resp) => {
 
@@ -314,8 +393,9 @@ router.get("/stories", async (req, resp) => {
       return;
     } else {
       let filteredStories = stories.map(story => ({
-        id: story.id,
+        id: story._id,
         author: story.author,
+        co_authors: story.co_authors,
         metadata: story.metadata,
         content: story.content
       }));
@@ -337,6 +417,7 @@ router.get("/stories", async (req, resp) => {
       resp.status(200).send(JSON.stringify({
         id: story.id,
         author: story.author,
+        co_authors: story.co_authors,
         metadata: story.metadata,
         content: story.content
       }));
@@ -358,6 +439,7 @@ router.get("/stories", async (req, resp) => {
     let filteredStories = stories.map(story => ({
       id: story.id,
       author: story.author,
+      co_authors: story.co_authors,
       metadata: story.metadata,
       content: story.content
     }));
@@ -427,9 +509,14 @@ router.get("/tags", async (req, resp) => {
     return;
   }
 
+  console.log(stories);
+
   // collect all tags (unique)
   let tags = new Set();
   stories.forEach(story => {
+    if (!story.metadata.tags) {
+      return;
+    }
     story.metadata.tags.forEach(tag => {
       tags.add(tag);
     });
