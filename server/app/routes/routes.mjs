@@ -225,19 +225,19 @@ router.post("/stories", checkSchema(schema.newStorySchemaRequest), async (req, r
     return;
   }
 
-  let story = req.body;
+  let request = req.body;
   // check if author_id and author match in db
   let collections = connect.db.collection("users");
 
   // getting _id from jwt
   let jwt = auth.extractTokenFromHeader(req.header("Authorization"));
-  let author = await auth.verifyToken(jwt);
-  if (author !== null) {
+  let jwt_user = await auth.verifyToken(jwt);
+  if (jwt_user !== null) {
     // check if co_authors match in db
-    if (story.co_authors) {
+    if (request.co_authors) {
 
       // check if co_authors are valid
-      for (let co_author of story.co_authors) {
+      for (let co_author of request.co_authors) {
         let query = { username: co_author };
         let co_author_result = await collections.findOne(query);
         if (!co_author_result) {
@@ -257,30 +257,33 @@ router.post("/stories", checkSchema(schema.newStorySchemaRequest), async (req, r
   let story_collection = connect.db.collection("stories");
 
   // check if an existing story with the same title exists
-  let existing_story = await story_collection.findOne({
-    "metadata.title": story.title,
+  // where the requester is a co_author or author
+  let query = {
+    "metadata.title": request.title,
     $or: [
-      { "author": story.author },
-      { "co_authors": story.co_authors }
+      { "author": jwt_user.username },
+      { "co_authors": jwt_user.username }
     ]
-  });
+  }
+  let existing_story = await story_collection.findOne(query);
   if (existing_story) {
+    console.log(existing_story);
     resp.status(400).send({
-        error: `Story with same title exists for author ${story.author} with co_authors ${story.co_authors}`
+        error: `Story with same title exists for author ${existing_story.author} with co_authors ${existing_story.co_authors}`
     });
     return;
   }
 
   // create a story
   let result = await story_collection.insertOne({
-    author: story.author,
-    co_authors: story.co_authors,
+    author: jwt_user.username,
+    co_authors: request.co_authors,
     metadata: {
-      title: story.title,
-      tags: story.tags,
-      draft: story.draft
+      title: request.title,
+      tags: request.tags,
+      draft: request.draft
     },
-    content: story.content
+    content: request.content
   })
   if (result) {
     resp.status(200).send({
@@ -302,34 +305,34 @@ router.put("/stories", checkSchema(schema.updateStoryRequest), async (req, resp)
   }
 
   let jwt = auth.extractTokenFromHeader(req.header("Authorization"));
-  let author = await auth.verifyToken(jwt);
-  if (author === null) {
+  let jwt_user = await auth.verifyToken(jwt);
+  if (jwt_user === null) {
     resp.status(400).send({ error: "Invalid JWT Parse" });
     return;
   }
 
-  let story = req.body;
+  let request = req.body;
 
   // check if author is part of the story author or co_authors
   let query = { 
-    _id: ObjectId.createFromHexString(story.id),
+    _id: ObjectId.createFromHexString(request.id),
     $or: [
-      { "author": author.username },
-      { "co_authors": author.username }
+      { "author": jwt_user.username },
+      { "co_authors": jwt_user.username }
     ]
   };
 
   let collections = connect.db.collection("stories");
   let existing_story = await collections.findOne(query);
   if (!existing_story) {
-    resp.status(400).send({ error: `Story not found, with id ${story.id} and author or co_author ${author.username}`});
+    resp.status(400).send({ error: `Story not found, with id ${request.id}!!`});
     return;
   }
 
   // verify co_authors
   let user_collections = connect.db.collection("users");
-  if (story.co_authors) {
-    for (let co_author of story.co_authors) {
+  if (request.co_authors) {
+    for (let co_author of request.co_authors) {
       let co_author_query = { username: co_author };
       let co_author_result = await user_collections.findOne(co_author_query);
       if (!co_author_result) {
@@ -344,22 +347,22 @@ router.put("/stories", checkSchema(schema.updateStoryRequest), async (req, resp)
 
   const updated_story = {
     $set: {
-      co_authors: story.co_authors,
+      co_authors: request.co_authors,
       metadata: {
-        title: story.title,
-        tags: story.tags,
-        draft: story.draft
+        title: request.title,
+        tags: request.tags,
+        draft: request.draft
       },
-      content: story.content,
+      content: request.content,
     }
   };
 
-  const filter = { "author": existing_story.author, _id: ObjectId.createFromHexString(story.id) };
+  const filter = { _id: ObjectId.createFromHexString(request.id) };
 
   let result = await collections.updateOne(filter, updated_story);
   if (result) {
     resp.status(200).send({
-      message: `Story updated by author ${author.username}`,
+      message: `Story updated by author ${jwt_user.username}`,
       result: result
     });
     return;
@@ -368,6 +371,48 @@ router.put("/stories", checkSchema(schema.updateStoryRequest), async (req, resp)
     return;
   }
 });
+
+router.delete("/stories", checkSchema(schema.deleteStoryRequest),async (req, resp) => {
+  const error = validationResult(req);
+  if (!error.isEmpty()) {
+    resp.status(400).send({ errors: error.array() });
+    return;
+  }
+
+  let request = req.body;
+  let jwt = auth.extractTokenFromHeader(req.header("Authorization"));
+  let delete_author = await auth.verifyToken(jwt);
+  if (delete_author === null) {
+    resp.status(400).send({ error: "Invalid JWT Parse" });
+    return;
+  }
+
+  let collections = connect.db.collection("stories");
+  let query = { _id: ObjectId.createFromHexString(request.id) };
+  let story = await collections.findOne(query);
+
+  if (!story) {
+    resp.status(400).send({ error: "Story not found" });
+    return;
+  }
+
+  if (story.author !== delete_author.username) {
+    resp.status(400).send({ error: "Unauthorized to delete story, should be the author" });
+    return;
+  }
+
+  let result = await collections.deleteOne(query);
+  if (result) {
+    resp.status(200).send({
+      message: `Story deleted by author ${delete_author.username}`,
+      result: result
+    });
+    return;
+  } else {
+    resp.status(400).send({ message: "Story not deleted, bad request" });
+    return;
+  }
+})
 
 // Fetch all stories
 router.get("/stories", async (req, resp) => {
