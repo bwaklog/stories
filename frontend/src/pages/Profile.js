@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaHome } from "react-icons/fa";
 import "../Profile.css";
 
 const Profile = () => {
@@ -67,29 +68,17 @@ const Profile = () => {
     fetchUserProfile();
   }, []);
 
-  const handleBack = () => {
-    window.history.back();
-  };
-
   const handleHome = () => {
     window.location.href = "/home";
   };
 
   const handleStoryClick = (storyData) => {
-    // Pass story data directly to the `ViewStory` component
     navigate("/viewstory", { state: { storyData } });
   };
 
   return (
     <div>
-      <div className="icons-container">
-        <button className="back-button" onClick={handleBack}>
-          Back
-        </button>
-        <button className="home-button" onClick={handleHome}>
-          Home
-        </button>
-      </div>
+      <FaHome className="icon" onClick={handleHome} />
       <div className="profile-container">
         <h1>User Profile</h1>
         <div className={`error-message ${error ? "visible" : "hidden"}`}>

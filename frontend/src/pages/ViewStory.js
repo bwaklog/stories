@@ -1,5 +1,5 @@
 import React from "react";
-import { FaUserCircle } from "react-icons/fa";
+import { FaHome, FaUserCircle } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../ViewStory.css";
@@ -13,9 +13,9 @@ const ViewStory = () => {
     return <div>No story data available</div>;
   }
 
-  const handleBack = () => {
-    window.history.back();
-  };
+  const openHome = () => {
+    window.location.href = "/home";
+  }
 
   const openProfile = () => {
     window.location.href = "/profile";
@@ -53,14 +53,11 @@ const ViewStory = () => {
   return (
     <div className="view-story">
       <div className="icons-container">
-        <button className="back-button" onClick={handleBack}>
-          Back
-        </button>
-        <button className="home-button" onClick={handleBack}>
-          Home
+        <button className="home-button" onClick={openHome}>
+          <FaHome size={30} />
         </button>
         <button className="profile-button" onClick={openProfile}>
-          <FaUserCircle size={32} />
+          <FaUserCircle size={30} />
         </button>
       </div>
       <div className="story-header"></div>

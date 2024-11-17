@@ -1,7 +1,9 @@
 .view-story {
-    padding: 16px;
-    background: #f4f7fb;
+    padding: 20px;
+    background: #fafafa;
     min-height: 100vh;
+    font-family: 'Arial', sans-serif;
+    color: #333;
 }
 
 .icons-container {
@@ -11,105 +13,102 @@
     width: 100%;
     display: flex;
     justify-content: space-between;
-    z-index: 1000;
     padding: 0 16px;
+    z-index: 1000;
 }
 
-.story-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    margin-top: 40px;
-}
-
-.story-header h1 {
-    font-size: 2.8em;
-    font-weight: 600;
-    color: #2d2d2d;
-    text-transform: capitalize;
-    letter-spacing: 0.5px;
-    margin-bottom: 5px;
-    max-width: 70%;
-    /* Ensure the title doesn't stretch too far */
-}
-
-.story-header h2 {
-    font-size: 1.4em;
-    font-weight: 500;
-    color: #5c5c5c;
-    margin: 5px 0;
-}
-
-.back-button,
+.home-button,
 .profile-button {
-    background-color: transparent;
-    color: #000;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.profile-button {
-    background-color: transparent;
-    color: #000;
+    background: none;
     border: none;
     cursor: pointer;
     font-size: 1.8em;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 8px;
+    color: #444;
+    transition: color 0.3s ease;
+}
+
+.home-button:hover,
+.profile-button:hover {
+    color: #007BFF;
+    /* Slight highlight on hover */
+}
+
+.story-header {
+    margin: 40px 0 20px;
+    text-align: center;
+}
+
+.story-header h1 {
+    font-size: 3em;
+    /* Increased font size */
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #222;
+}
+
+.story-header h2 {
+    font-size: 1.5em;
+    /* Slightly larger for subheadings */
+    font-weight: 400;
+    color: #555;
+    margin-top: 5px;
 }
 
 .story-details {
     text-align: center;
     margin-bottom: 20px;
-    padding-bottom: 20px;
-    border-bottom: 2px solid #ddd;
-}
-
-.story-details .author-heading {
-    text-align: left;
-    margin-left: 30px;
-    color: #777;
-    margin-bottom: 0;
-    font-size: 1.2em;
-}
-
-.story-details h1 {
-    font-size: 3em;
-    color: #333;
-    font-weight: 700;
-    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
 }
 
 .story-details h2 {
-    font-size: 1.5em;
-    font-weight: 500;
-    margin-bottom: 20px;
+    font-size: 2em;
+    /* Increased font size for the title */
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #222;
+}
+
+.story-details .author-heading {
+    font-size: 1.3em;
+    /* Increased font size for "Written By" */
+    color: #555;
+    margin-top: 5px;
 }
 
 .story-content {
     margin: 0 auto;
-    max-width: 1400px;
-    padding: 30px;
+    max-width: 800px;
+    padding: 20px;
     border: 1px solid #ddd;
     border-radius: 8px;
     background: #fff;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .story-content p {
-    font-size: 1.15em;
-    line-height: 1.8;
-    color: #555;
-    margin-left: 150px;
-    margin-right: 150px;
-    margin-bottom: 20px;
-    margin-top: 0;
+    font-size: 1.1em;
+    line-height: 1.6;
+    color: #444;
+    margin-bottom: 15px;
 }
 
 .story-content p:last-child {
     margin-bottom: 0;
+}
+
+button {
+    background-color: #333;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    font-size: 1em;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #000;
+    color: #fff;
 }

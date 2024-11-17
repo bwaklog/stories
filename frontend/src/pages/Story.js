@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Editor } from "@toast-ui/react-editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
+import { FaHome, FaUserCircle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import "../Story.css";
 
 const MyEditor = ({
@@ -117,6 +119,7 @@ const SideBar = ({
 }) => {
   const [currentTag, setCurrentTag] = React.useState("");
   const [currentCoAuthor, setCurrentCoAuthor] = React.useState("");
+  const navigate = useNavigate();
 
   const handleTagKeyDown = (e) => {
     if (e.key === "Enter") {
@@ -141,9 +144,16 @@ const SideBar = ({
 
   return (
     <div className="sidebar">
+      <div className="icons">
+        <FaHome onClick={() => navigate("/home")} className="home-icon" />
+        <FaUserCircle
+          onClick={() => navigate("/profile")}
+          className="profile-icon"
+        />
+      </div>
       <button className="share">Share</button>
       <div className="title-input">
-        <h3>Story Title</h3>
+        <h4>Story Title</h4>
         <input
           required
           type="text"
@@ -151,7 +161,7 @@ const SideBar = ({
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Enter story title"
         />
-        <h3>Tags</h3>
+        <h4>Tags</h4>
         <div className="tags-container">
           {tags.map((tag, index) => (
             <span key={index} className="tag">
@@ -173,7 +183,7 @@ const SideBar = ({
       </div>
 
       <div className="co-author">
-        <h3>Co-Authors</h3>
+        <h4>Co-Authors</h4>
         <input
           type="text"
           value={currentCoAuthor}

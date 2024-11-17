@@ -16,7 +16,6 @@
    display: flex;
    flex-wrap: wrap;
    gap: 10px;
-   /* Adjust gap for spacing between buttons */
    margin-top: 10px;
 }
 
@@ -39,11 +38,8 @@ button:hover {
 
 .tag-button.selected {
    background-color: #333;
-   /* Dark background for selected tag */
    color: #fff;
-   /* White text for selected tag */
    border-color: #333;
-   /* Dark border for selected tag */
 }
 
 .left-sidebar,

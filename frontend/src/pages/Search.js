@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaUserCircle } from "react-icons/fa";
+import { FaHome, FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import "../Search.css";
 
@@ -55,28 +55,15 @@ const Search = () => {
     }
   };
 
-  const handleBack = () => {
-    window.history.back();
-  };
-
-  const handleHome = () => {
-    window.location.href = "/home";
-  };
-
   const handleStoryClick = (storyData) => {
     navigate(`/viewstory`, { state: { storyData } });
   };
 
   return (
     <div>
-      <div className="icons-container">
-        <button className="back-button" onClick={handleBack}>
-          Back
-        </button>
-        <button className="home-button" onClick={handleHome}>
-          Home
-        </button>
-      </div>
+      <a href="/home" className="home-icon">
+        <FaHome size={30} />
+      </a>
       <a href="/profile" className="profile-icon">
         <FaUserCircle size={30} />
       </a>
