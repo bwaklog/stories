@@ -51,6 +51,7 @@ button:hover {
 .right-sidebar {
    width: 15vw;
    right: 10vw;
+   z-index: -1;
 }
 
 .nav {
@@ -79,13 +80,14 @@ button:hover {
    cursor: pointer;
    transform: scale(1.05);
    box-shadow: 0 0.75rem 1.25rem rgba(0, 0, 0, 0.2);
+   z-index: 1;
 }
 
 .profile {
    display: flex;
    flex-direction: column;
    gap: 2vh;
-   margin-top: 280px;
+   margin-top: 140px;
 }
 
 .profile button {

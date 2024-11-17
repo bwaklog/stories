@@ -18,12 +18,15 @@ function viewStory(story) {
   window.location.href = "/viewStory";
 }
 
+function searchStories() {
+  window.location.href = "/search";
+}
+
 function LeftSideBar() {
   return (
     <div className="left-sidebar">
       <div className="nav">
-        <button>Explore</button>
-        <button>Search Stories</button>
+        <button onClick={searchStories}>Search Stories</button>
         <button
           onClick={() => (window.location.href = "http://localhost:3000/story")}
         >

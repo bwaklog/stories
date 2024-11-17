@@ -65,8 +65,25 @@ const Profile = () => {
     fetchUserProfile();
   }, []);
 
+  const handleBack = () => {
+    window.history.back();
+  };
+
+  const handleHome = () => {
+    window.location.href = "/home";
+  };
+
   return (
     <div>
+      <div className="icons-container">
+        <button className="back-button" onClick={handleBack}>
+          Back
+        </button>
+        <button className="home-button" onClick={handleHome}>
+          Home
+        </button>
+      </div>
+
       <div className="profile-container">
         <h1>User Profile</h1>
         <div className={`error-message ${error ? "visible" : "hidden"}`}>

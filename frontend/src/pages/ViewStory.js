@@ -1,10 +1,10 @@
 import React from "react";
-import { FaArrowLeft, FaUserCircle } from "react-icons/fa";
+import { FaUserCircle } from "react-icons/fa";
 import "../ViewStory.css";
 
 const ViewStory = () => {
   const handleBack = () => {
-    window.location.href = "/home";
+    window.history.back();
   };
 
   const openProfile = () => {
@@ -15,17 +15,22 @@ const ViewStory = () => {
 
   return (
     <div className="view-story">
-      <div className="story-header">
+      <div className="icons-container">
         <button className="back-button" onClick={handleBack}>
-          <FaArrowLeft size={24} />
+          Back
         </button>
-        <h1>{storyData.title}</h1>
+        <button className="home-button" onClick={handleBack}>
+          Home
+        </button>
         <button className="profile-button" onClick={openProfile}>
           <FaUserCircle size={32} />
         </button>
       </div>
+      <div className="story-header">
+        <h1>{storyData.title}</h1>
+      </div>
       <div className="story-details">
-        <h2>{storyData.title}need to figure out tittle code</h2>
+        <h2>{storyData.title}need to figure out tittle code here</h2>
         <h3 className="author-heading">Written By: {storyData.author}</h3>
       </div>
       <div className="story-content">

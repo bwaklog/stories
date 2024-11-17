@@ -4,11 +4,24 @@
     min-height: 100vh;
 }
 
+.icons-container {
+    position: fixed;
+    top: 20px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    z-index: 1000;
+    padding: 0 16px;
+}
+
 .story-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    margin-top: 40px;
+    /* Ensure spacing from top for fixed header */
 }
 
 .story-header h1 {
@@ -18,6 +31,8 @@
     text-transform: capitalize;
     letter-spacing: 0.5px;
     margin-bottom: 5px;
+    max-width: 70%;
+    /* Ensure the title doesn't stretch too far */
 }
 
 .story-header h2 {
@@ -37,7 +52,15 @@
 }
 
 .profile-button {
+    background-color: transparent;
+    color: #000;
+    border: none;
+    cursor: pointer;
     font-size: 1.8em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
 }
 
 .story-details {
@@ -51,6 +74,7 @@
     text-align: left;
     margin-left: 30px;
     margin-bottom: 0;
+    font-size: 1.2em;
 }
 
 .story-details h1 {
@@ -74,6 +98,8 @@
     border: 1px solid #ddd;
     border-radius: 8px;
     background: #fff;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    /* Add subtle shadow for better presentation */
 }
 
 .story-content p {
@@ -87,4 +113,3 @@
 .story-content p:last-child {
     margin-bottom: 0;
 }
-

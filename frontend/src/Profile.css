@@ -1,3 +1,36 @@
+.icons-container {
+    position: fixed;
+    top: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    z-index: 1000;
+}
+
+.back-button,
+.home-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 15px;
+    color: black;
+    font-size: 24px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: font-weight 0.3s ease;
+}
+
+.back-button:hover,
+.home-button:hover {
+    font-weight: bold;
+}
+
+.home-button {
+    margin-left: 120px;
+}
+
 .profile-container {
     max-width: 600px;
     margin: 50px auto;
