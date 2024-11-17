@@ -16,6 +16,8 @@ const Register = () => {
     setEmailError("");
     setUsernameError("");
     setPasswordError("");
+    
+    const trimmedUsername = username.trim();
 
     if (email === "") {
       setEmailError("Please enter your email");
@@ -25,11 +27,11 @@ const Register = () => {
       setEmailError("Please enter a valid email");
       return;
     }
-    if (username === "") {
+    if (trimmedUsername === "") {
       setUsernameError("Please enter your username");
       return;
     }
-    if (!/^[a-zA-Z0-9_]*$/.test(username)) {
+    if (!/^[a-zA-Z0-9_]*$/.test(trimmedUsername)) {
       setUsernameError("Please enter a valid username");
       return;
     }
@@ -47,7 +49,7 @@ const Register = () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, username, password }),
+      body: JSON.stringify({ email, username: trimmedUsername, password }),
     });
 
     const data = await response.json();

@@ -14,11 +14,13 @@ const Login = () => {
     setUsernameError("");
     setPasswordError("");
 
-    if (username === "") {
+    const trimmedUsername = username.trim();
+
+    if (trimmedUsername === "") {
       setUsernameError("Please enter your username");
       return;
     }
-    if (!/^[a-zA-Z0-9_]*$/.test(username)) {
+    if (!/^[a-zA-Z0-9_]*$/.test(trimmedUsername)) {
       setUsernameError("Please enter a valid username");
       return;
     }
@@ -36,7 +38,7 @@ const Login = () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ username: trimmedUsername, password }),
     });
 
     const data = await response.json();
@@ -44,7 +46,6 @@ const Login = () => {
     if (response.ok) {
       localStorage.setItem("jwt", data.user.jwt);
       localStorage.setItem("author", data.user.username);
-      console.log("author: ", data.user.username);
       navigate("/home", { state: { username: data.user.username } });
     } else {
       setPasswordError(data.message || "Invalid username or password");
