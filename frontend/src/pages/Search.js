@@ -63,10 +63,8 @@ const Search = () => {
     window.location.href = "/home";
   };
 
-  const handleStoryClick = (storyId) => {
-    const storyData = results.find((story) => story.id === storyId);
-    localStorage.setItem("storyData", JSON.stringify(storyData));
-    navigate(`/viewstory`);
+  const handleStoryClick = (storyData) => {
+    navigate(`/viewstory`, { state: { storyData } });
   };
 
   return (
@@ -113,7 +111,7 @@ const Search = () => {
           <div className="results-container">
             <ul>
               {results.map((story, index) => (
-                <li key={index} onClick={() => handleStoryClick(story.id)}>
+                <li key={index} onClick={() => handleStoryClick(story)}>
                   <h3>{story.metadata.title}</h3>
                   <p>{story.content}</p>
                   <p>

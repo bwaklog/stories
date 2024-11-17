@@ -75,12 +75,9 @@ const Profile = () => {
     window.location.href = "/home";
   };
 
-  const handleStoryClick = (storyId) => {
-    const selectedStory = userData.stories.find(
-      (story) => story.id === storyId
-    );
-    localStorage.setItem("storyData", JSON.stringify(selectedStory));
-    navigate("/viewstory");
+  const handleStoryClick = (storyData) => {
+    // Pass story data directly to the `ViewStory` component
+    navigate("/viewstory", { state: { storyData } });
   };
 
   return (
@@ -114,7 +111,7 @@ const Profile = () => {
         {userData.stories.length > 0 ? (
           <ul>
             {userData.stories.map((story, index) => (
-              <li key={index} onClick={() => handleStoryClick(story.id)}>
+              <li key={index} onClick={() => handleStoryClick(story)}>
                 <h3>{story.metadata.title}</h3>
                 <p>{story.content}</p>
               </li>

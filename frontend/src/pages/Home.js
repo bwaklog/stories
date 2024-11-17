@@ -1,22 +1,19 @@
 import "../Home.css";
 import React, { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
+import { useNavigate } from "react-router-dom";
 
 const tags = ["Personal", "Adventure", "Fun", "Sad", "Happy", "Kid Friendly"];
 
 function handleLogout() {
   localStorage.removeItem("jwt");
   localStorage.removeItem("author");
+  localStorage.removeItem("storyData");
   window.location.href = "/";
 }
 
 function viewProfile() {
   window.location.href = "/profile";
-}
-
-function viewStory(story) {
-  localStorage.setItem("storyData", JSON.stringify(story));
-  window.location.href = "/viewStory";
 }
 
 function searchStories() {
@@ -59,6 +56,7 @@ function RightSideBar() {
 
 function MainContent() {
   const [stories, setStories] = useState([]);
+  const navigate = useNavigate(); // Initialize the navigate function
 
   useEffect(() => {
     const fetchStories = async () => {
@@ -66,9 +64,9 @@ function MainContent() {
         const response = await fetch("http://localhost:4000/stories", {
           method: "GET",
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem("jwt")}`,
+            Authorization: `Bearer ${localStorage.getItem("jwt")}`,
           },
-        })
+        });
         const story = await response.json();
         setStories(story);
       } catch (error) {
@@ -77,6 +75,10 @@ function MainContent() {
     };
     fetchStories();
   }, []);
+
+  const viewStory = (storyData) => {
+    navigate("/viewStory", { state: { storyData } });
+  };
 
   return (
     <div className="card-container">

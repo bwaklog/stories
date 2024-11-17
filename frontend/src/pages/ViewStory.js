@@ -1,9 +1,17 @@
 import React from "react";
 import { FaUserCircle } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
+import { useLocation } from "react-router-dom"; // Import useLocation hook
 import "../ViewStory.css";
 
 const ViewStory = () => {
+  const { state } = useLocation(); // Get the passed state
+  const { storyData } = state || {}; // Destructure story data
+
+  if (!storyData) {
+    return <div>No story data available</div>;
+  }
+
   const handleBack = () => {
     window.history.back();
   };
@@ -11,9 +19,6 @@ const ViewStory = () => {
   const openProfile = () => {
     window.location.href = "/profile";
   };
-
-  const storyData = JSON.parse(localStorage.getItem("storyData"));
-  console.log("Story Data Received: ", storyData);
 
   return (
     <div className="view-story">
