@@ -113,3 +113,17 @@
 .story-content p:last-child {
     margin-bottom: 0;
 }
+
+.tag-input {
+    margin-top: 20px;
+}
+
+.tags-container {
+    display: flex;
+    flex-direction: column;
+    colour: #777;
+}
+
+.tag {
+    margin: 5px 0;
+}
