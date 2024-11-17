@@ -13,15 +13,20 @@ const MyEditor = ({ title }) => {
       const jwtToken = localStorage.getItem("jwt");
       console.log("JWT Token retrieved: ", jwtToken);
       const author = localStorage.getItem("author");
+
+      if (!title.trim()) {
+         alert("Please provide a title before saving.");
+         return;
+     }
    
       try {
          const response = await fetch("http://localhost:4000/stories", {
             method: "POST",
             headers: {
-               'Content-Type': 'application/json'
+               'Content-Type': 'application/json',
+               'Authorization': `Bearer ${jwtToken}`
             },
             body: JSON.stringify({ 
-               jwt: jwtToken,
                author: author,
                content: markdownContent,
                title: title,

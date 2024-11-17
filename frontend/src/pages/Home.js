@@ -59,7 +59,12 @@ function MainContent() {
   useEffect(() => {
     const fetchStories = async () => {
       try {
-        const response = await fetch("http://localhost:4000/stories");
+        const response = await fetch("http://localhost:4000/stories", {
+          method: "GET",
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem("jwt")}`,
+          },
+        })
         const story = await response.json();
         setStories(story);
       } catch (error) {
