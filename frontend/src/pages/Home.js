@@ -1,5 +1,6 @@
 import "../Home.css";
 import React, { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
 
 const tags = ["Personal", "Adventure", "Fun", "Sad", "Happy", "Kid Friendly"];
 
@@ -82,11 +83,11 @@ function MainContent() {
       {stories.length > 0 ? (
         stories.map((story, index) => (
           <div key={index} onClick={() => viewStory(story)}>
-            <h3>{story.title}</h3>
+            <h3>{story.metadata.title}</h3>
             <p>
               <strong>Author: </strong> {story.author}
             </p>
-            <p>{story.content}</p>
+            <ReactMarkdown>{story.content}</ReactMarkdown>
           </div>
         ))
       ) : (

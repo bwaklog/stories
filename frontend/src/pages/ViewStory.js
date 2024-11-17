@@ -1,5 +1,6 @@
 import React from "react";
 import { FaUserCircle } from "react-icons/fa";
+import ReactMarkdown from "react-markdown";
 import "../ViewStory.css";
 
 const ViewStory = () => {
@@ -12,6 +13,7 @@ const ViewStory = () => {
   };
 
   const storyData = JSON.parse(localStorage.getItem("storyData"));
+  console.log("Story Data Received: ", storyData);
 
   return (
     <div className="view-story">
@@ -27,14 +29,13 @@ const ViewStory = () => {
         </button>
       </div>
       <div className="story-header">
-        <h1>{storyData.title}</h1>
       </div>
       <div className="story-details">
-        <h2>{storyData.title}need to figure out tittle code here</h2>
+        <h2><strong>{storyData.metadata.title}</strong></h2>
         <h3 className="author-heading">Written By: {storyData.author}</h3>
       </div>
       <div className="story-content">
-        <p>{storyData.content}</p>
+        <ReactMarkdown>{storyData.content}</ReactMarkdown>
       </div>
     </div>
   );
