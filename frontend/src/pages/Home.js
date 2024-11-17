@@ -39,13 +39,19 @@ function LeftSideBar() {
   );
 }
 
-function RightSideBar() {
+function RightSideBar({ selectedTags, toggleTag }) {
   return (
     <div className="right-sidebar">
       <h3 style={{ margin: 0, marginBottom: 5 }}>Mini Tags Explorer</h3>
       <div className="tags-buttons">
         {tags.map((tag, index) => (
-          <button style={{ margin: 3 }} key={index}>
+          <button
+            key={index}
+            className={`tag-button ${
+              selectedTags.includes(tag) ? "selected" : ""
+            }`}
+            onClick={() => toggleTag(tag)}
+          >
             {tag}
           </button>
         ))}
@@ -54,27 +60,40 @@ function RightSideBar() {
   );
 }
 
-function MainContent() {
+function MainContent({ selectedTags }) {
   const [stories, setStories] = useState([]);
-  const navigate = useNavigate(); // Initialize the navigate function
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchStories = async () => {
+      let url = "http://localhost:4000/stories";
+      if (selectedTags.length > 0) {
+        url += `?tag=${selectedTags.join(",")}`;
+      }
+
       try {
-        const response = await fetch("http://localhost:4000/stories", {
+        const response = await fetch(url, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("jwt")}`,
           },
         });
-        const story = await response.json();
-        setStories(story);
+
+        const data = await response.json();
+
+        if (Array.isArray(data)) {
+          setStories(data); // Directly set all the stories returned by API
+        } else {
+          console.error("Data returned is not an array:", data);
+          setStories([]);
+        }
       } catch (error) {
-        console.log(error);
+        console.error("Error fetching stories:", error);
       }
     };
+
     fetchStories();
-  }, []);
+  }, [selectedTags]);
 
   const viewStory = (storyData) => {
     navigate("/viewStory", { state: { storyData } });
@@ -93,18 +112,29 @@ function MainContent() {
           </div>
         ))
       ) : (
-        <p>Loading stories...</p>
+        <p>No stories found.</p>
       )}
     </div>
   );
 }
 
 export default function Home() {
+  const [selectedTags, setSelectedTags] = useState([]);
+
+  const toggleTag = (tag) => {
+    setSelectedTags(
+      (prevSelectedTags) =>
+        prevSelectedTags.includes(tag)
+          ? prevSelectedTags.filter((t) => t !== tag) // Deselect tag
+          : [...prevSelectedTags, tag] // Select tag
+    );
+  };
+
   return (
     <div className="container">
       <LeftSideBar />
-      <MainContent />
-      <RightSideBar />
+      <MainContent selectedTags={selectedTags} />
+      <RightSideBar selectedTags={selectedTags} toggleTag={toggleTag} />
     </div>
   );
 }

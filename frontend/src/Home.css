@@ -12,6 +12,14 @@
    gap: 1vw;
 }
 
+.tags-buttons {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 10px;
+   /* Adjust gap for spacing between buttons */
+   margin-top: 10px;
+}
+
 button {
    background-color: transparent;
    border-radius: 0.25rem;
@@ -27,6 +35,15 @@ button:hover {
    background-color: #f5f5f5;
    color: #000;
    border-color: #999;
+}
+
+.tag-button.selected {
+   background-color: #333;
+   /* Dark background for selected tag */
+   color: #fff;
+   /* White text for selected tag */
+   border-color: #333;
+   /* Dark border for selected tag */
 }
 
 .left-sidebar,
@@ -51,7 +68,6 @@ button:hover {
 .right-sidebar {
    width: 15vw;
    right: 10vw;
-   z-index: -1;
 }
 
 .nav {
@@ -78,9 +94,8 @@ button:hover {
 
 .card-container div:hover {
    cursor: pointer;
-   transform: scale(1.05);
+   transform: scale(1.03);
    box-shadow: 0 0.75rem 1.25rem rgba(0, 0, 0, 0.2);
-   z-index: 1;
 }
 
 .profile {
