@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FaUserCircle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import "../Search.css";
 
 const Search = () => {
@@ -8,6 +9,7 @@ const Search = () => {
   const [results, setResults] = useState([]);
   const [error, setError] = useState("");
   const [searched, setSearched] = useState(false);
+  const navigate = useNavigate();
 
   const handleSearch = async () => {
     if (!query) {
@@ -61,6 +63,12 @@ const Search = () => {
     window.location.href = "/home";
   };
 
+  const handleStoryClick = (storyId) => {
+    const storyData = results.find((story) => story.id === storyId);
+    localStorage.setItem("storyData", JSON.stringify(storyData));
+    navigate(`/viewstory`);
+  };
+
   return (
     <div>
       <div className="icons-container">
@@ -105,7 +113,7 @@ const Search = () => {
           <div className="results-container">
             <ul>
               {results.map((story, index) => (
-                <li key={index}>
+                <li key={index} onClick={() => handleStoryClick(story.id)}>
                   <h3>{story.metadata.title}</h3>
                   <p>{story.content}</p>
                   <p>

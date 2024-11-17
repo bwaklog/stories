@@ -28,10 +28,11 @@ const ViewStory = () => {
           <FaUserCircle size={32} />
         </button>
       </div>
-      <div className="story-header">
-      </div>
+      <div className="story-header"></div>
       <div className="story-details">
-        <h2><strong>{storyData.metadata.title}</strong></h2>
+        <h2>
+          <strong>{storyData.metadata.title}</strong>
+        </h2>
         <h3 className="author-heading">Written By: {storyData.author}</h3>
       </div>
       <div className="story-content">

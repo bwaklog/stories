@@ -85,6 +85,7 @@ h2 {
     list-style-type: none;
     padding: 0;
     margin: 0;
+    cursor: pointer;
 }
 
 .stories-container li {
@@ -94,6 +95,7 @@ h2 {
     border-radius: 5px;
     background: #ffffff;
     font-size: 16px;
+    cursor: pointer;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 

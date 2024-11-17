@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../Profile.css";
 
 const Profile = () => {
@@ -8,6 +9,7 @@ const Profile = () => {
     stories: [],
   });
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -73,6 +75,14 @@ const Profile = () => {
     window.location.href = "/home";
   };
 
+  const handleStoryClick = (storyId) => {
+    const selectedStory = userData.stories.find(
+      (story) => story.id === storyId
+    );
+    localStorage.setItem("storyData", JSON.stringify(selectedStory));
+    navigate("/viewstory");
+  };
+
   return (
     <div>
       <div className="icons-container">
@@ -83,7 +93,6 @@ const Profile = () => {
           Home
         </button>
       </div>
-
       <div className="profile-container">
         <h1>User Profile</h1>
         <div className={`error-message ${error ? "visible" : "hidden"}`}>
@@ -105,7 +114,7 @@ const Profile = () => {
         {userData.stories.length > 0 ? (
           <ul>
             {userData.stories.map((story, index) => (
-              <li key={index}>
+              <li key={index} onClick={() => handleStoryClick(story.id)}>
                 <h3>{story.metadata.title}</h3>
                 <p>{story.content}</p>
               </li>
