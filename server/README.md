@@ -92,7 +92,7 @@ curl -X GET                                             \
 --header 'Authorization: Bearer jwt-token-of-the-user'  \
 http://localhost:<PORT>/stories?id=storyid
 
-# get story with stories with tag as tagname
+# get stories with tag as tagname
 curl -X GET                                             \
 --header 'Authorization: Bearer jwt-token-of-the-user'  \
 http://localhost:<PORT>/stories?tag=tagname

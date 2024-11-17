@@ -15,7 +15,7 @@ router.use(async (req, resp, next) => {
     // authorize the request
     const auth_header = req.header("Authorization");
     if (!auth_header) {
-      resp.status(401).send({ error: "Unauthorized" });
+      resp.status(401).send({ error: "Unauthorized. No Authentication header provided" });
       return;
     }
 
@@ -33,12 +33,12 @@ router.use(async (req, resp, next) => {
     try {
       var decoded = await auth.verifyToken(token);
       if (decoded === null) {
-        resp.status(401).send({ error: "Unauthorized" });
+        resp.status(401).send({ error: "Unauthorized. Unable to verify decoded jwt user" });
         return;
       }
       console.log(`Decoded: ${JSON.stringify(decoded)}`);
     } catch (error) {
-      resp.status(401).send({ error: "Unauthorized" });
+      resp.status(401).send({ error: "Unauthorized JWT" });
       return;
     }
   }
@@ -269,7 +269,7 @@ router.post("/stories", checkSchema(schema.newStorySchemaRequest), async (req, r
   if (existing_story) {
     console.log(existing_story);
     resp.status(400).send({
-        error: `Story with same title exists for author ${existing_story.author} with co_authors ${existing_story.co_authors}`
+      error: `Story with same title exists for author ${existing_story.author} with co_authors ${existing_story.co_authors}`
     });
     return;
   }
@@ -288,6 +288,7 @@ router.post("/stories", checkSchema(schema.newStorySchemaRequest), async (req, r
   if (result) {
     resp.status(200).send({
       message: "Story created",
+      id: result.insertedId,
       result: result
     });
     return;
@@ -314,7 +315,7 @@ router.put("/stories", checkSchema(schema.updateStoryRequest), async (req, resp)
   let request = req.body;
 
   // check if author is part of the story author or co_authors
-  let query = { 
+  let query = {
     _id: ObjectId.createFromHexString(request.id),
     $or: [
       { "author": jwt_user.username },
@@ -325,7 +326,7 @@ router.put("/stories", checkSchema(schema.updateStoryRequest), async (req, resp)
   let collections = connect.db.collection("stories");
   let existing_story = await collections.findOne(query);
   if (!existing_story) {
-    resp.status(400).send({ error: `Story not found, with id ${request.id}!!`});
+    resp.status(400).send({ error: `Story not found, with id ${request.id}!!` });
     return;
   }
 
@@ -372,7 +373,7 @@ router.put("/stories", checkSchema(schema.updateStoryRequest), async (req, resp)
   }
 });
 
-router.delete("/stories", checkSchema(schema.deleteStoryRequest),async (req, resp) => {
+router.delete("/stories", checkSchema(schema.deleteStoryRequest), async (req, resp) => {
   const error = validationResult(req);
   if (!error.isEmpty()) {
     resp.status(400).send({ errors: error.array() });
@@ -427,11 +428,75 @@ router.get("/stories", async (req, resp) => {
   if (req.query.author) {
     let author = req.query.author;
     let collections = connect.db.collection("stories");
-    let stories = await collections.find({
-      $or: [
-        { "author": author }, { "co_authors": author }
-      ]
-    }).toArray();
+
+    let jwt = auth.extractTokenFromHeader(req.header("Authorization"));
+    let jwt_user = await auth.verifyToken(jwt);
+    if (jwt_user === null) {
+      resp.status(400).send({ error: "Invalid JWT Parse" });
+      return;
+    }
+
+    var query = {};
+
+    if (author === jwt_user.username) {
+      console.log("author");
+      query = {
+        // "metadata.draft": true,
+        $or: [
+          { "author": author }, { "co_authors": author }
+        ]
+      };
+    } else {
+      // query = {
+      //   "metadata.draft": false,
+      //   $or: [
+      //     { "author": author }, { "co_authors": author }
+      //   ]
+      // };
+      console.log("not the author");
+      query = {
+        $or: [
+          {
+            $and: [
+              { "metadata.draft": true },
+              {
+                $or: [
+                  {
+                    $and: [
+                      { "co_authors": { $in: [jwt_user.username] } },
+                      { "author": { $in: [author] } },
+                    ]
+                  },
+                  {
+                    $and: [
+                      { "author": { $in: [jwt_user.username] } },
+                      { "co_authors": { $in: [author] } },
+                    ]
+                  },
+                ]
+              }
+            ]
+          },
+          {
+            $and: [
+              { "metadata.draft": false },
+              {
+                $or: [
+                  { "author": author }, { "co_authors": author }
+                ]
+              }
+            ]
+          },
+        ]
+      }
+    }
+    // "metadata.draft": false,
+    // $or: [
+    //   { "author": author },
+    //   { "co_authors": author }
+    // ]
+
+    let stories = await collections.find(query).toArray();
 
     if (stories.length === 0) {
       resp.status(404).send({ error: "Stories not found" });
@@ -450,17 +515,25 @@ router.get("/stories", async (req, resp) => {
   }
   if (req.query.id) {
     console.log(req.query.id);
-    let id = req.query.id;
-    let collections = connect.db.collection("stories");
-    if (isNaN(parseInt(id))) {
-      resp.status(400).send({ error: "Invalid request" });
-      return
+
+    let jwt = auth.extractTokenFromHeader(req.header("Authorization"));
+    let jwt_user = await auth.verifyToken(jwt);
+    if (jwt_user === null) {
+      resp.status(400).send({ error: "Invalid JWT Parse" });
+      return;
     }
-    let story = await collections.findOne({ "id": parseInt(id) });
+
+    let query = { _id: ObjectId.createFromHexString(req.query.id) };
+    let collections = connect.db.collection("stories");
+    let story = await collections.findOne(query);
     console.log(story);
     if (story) {
+      if (story.metadata.draft === true && story.author !== jwt_user.username) {
+        resp.status(400).send({ error: "Unauthorized to view draft story" });
+        return;
+      }
       resp.status(200).send(JSON.stringify({
-        id: story.id,
+        id: story._id,
         author: story.author,
         co_authors: story.co_authors,
         metadata: story.metadata,
@@ -476,13 +549,16 @@ router.get("/stories", async (req, resp) => {
   if (req.query.tag) {
     let tag = req.query.tag;
     let collections = connect.db.collection("stories");
-    let stories = await collections.find({ "metadata.tags": tag }).toArray();
+    let stories = await collections.find({
+      "metadata.tags": tag,
+      "metadata.draft": false
+    }).toArray();
     if (stories.length === 0) {
       resp.status(404).send({ error: "Stories not found" });
       return;
     }
     let filteredStories = stories.map(story => ({
-      id: story.id,
+      id: story._id,
       author: story.author,
       co_authors: story.co_authors,
       metadata: story.metadata,
@@ -492,8 +568,16 @@ router.get("/stories", async (req, resp) => {
     return;
   }
 
+
+  let jwt = auth.extractTokenFromHeader(req.header("Authorization"));
+  let jwt_user = await auth.verifyToken(jwt);
+  if (jwt_user === null) {
+    resp.status(400).send({ error: "Invalid JWT Parse" });
+    return;
+  }
   let collections = connect.db.collection("stories");
-  let stories = await collections.find().toArray();
+  query = { "metadata.draft": false };
+  let stories = await collections.find(query).toArray();
   console.log(stories);
   if (stories.length === 0) {
     resp.status(404).send({ error: "Stories not found" });
@@ -508,46 +592,12 @@ router.get("/authors", async (req, resp) => {
 
 })
 
-// Fetch Story with ID
-router.get("/stories/id/:id", async (req, resp) => {
-  let id = req.params.id;
-  if (id === null) {
-    resp.status(400).send({ error: "Invalid request" });
-    return;
-  }
-  let collections = connect.db.collection("stories");
-  let story = await collections.findOne({ id: id });
-  console.log(story);
-  resp.send(story);
-  // if (stories) {
-  //     resp.status(200).send(stories);
-  // } else {
-  //     resp.status(404).send({ error: "Story not found" });
-  // }
-});
-
-router.get("/stories/:id/authors", async (req, resp) => {
-  let story_id = req.params.id;
-  let collections = connect.db.collection("stories");
-  console.log(req.params);
-  let story = await collections.findOne({ "id": story_id });
-  console.log(story);
-  if (story) {
-    resp.status(200).send(JSON.stringify({
-      "author": story.author,
-      "co_authors": story["co_authors"]
-    }))
-  } else {
-    resp.status(400).send(JSON.stringify({
-      "message": "Story not found"
-    }))
-  }
-});
-
 
 router.get("/tags", async (req, resp) => {
   let collections = connect.db.collection("stories");
-  let stories = await collections.find().toArray();
+  let stories = await collections.find({
+    "metadata.draft": false
+  }).toArray();
 
   if (stories.length === 0) {
     resp.status(404).send({ error: "Stories not found" });
@@ -574,7 +624,10 @@ router.get("/tags", async (req, resp) => {
 router.get("/tags/:tag", async (req, resp) => {
   let tag = req.params.tag;
   let collections = connect.db.collection("stories");
-  let stories = await collections.find({ "metadata.tags": tag }).toArray();
+  let stories = await collections.find({
+    "metadata.tags": tag,
+    "metadata.draft": false
+  }).toArray();
   if (stories.length === 0) {
     resp.status(404).send({ error: "Stories not found" });
   } else {
