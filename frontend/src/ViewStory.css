@@ -21,7 +21,6 @@
     align-items: center;
     margin-bottom: 20px;
     margin-top: 40px;
-    /* Ensure spacing from top for fixed header */
 }
 
 .story-header h1 {
@@ -99,31 +98,18 @@
     border-radius: 8px;
     background: #fff;
     box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-    /* Add subtle shadow for better presentation */
 }
 
 .story-content p {
     font-size: 1.15em;
     line-height: 1.8;
     color: #555;
+    margin-left: 150px;
+    margin-right: 150px;
     margin-bottom: 20px;
     margin-top: 0;
 }
 
 .story-content p:last-child {
     margin-bottom: 0;
-}
-
-.tag-input {
-    margin-top: 20px;
-}
-
-.tags-container {
-    display: flex;
-    flex-direction: column;
-    colour: #777;
-}
-
-.tag {
-    margin: 5px 0;
 }

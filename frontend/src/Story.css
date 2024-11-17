@@ -103,3 +103,19 @@
    margin-bottom: 20px;
    text-align: center;
 }
+
+.tag-input {
+   margin-top: 20px;
+}
+
+.tags-container {
+   display: flex;
+   flex-direction: column;
+   colour: #777;
+   overflow-y: auto;
+   max-height: 100px;
+}
+
+.tag {
+   margin: 5px 0;
+}

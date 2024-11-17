@@ -1,17 +1,26 @@
-import "../Story.css";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Editor } from "@toast-ui/react-editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
+import "../Story.css";
 
-const MyEditor = ({ title, tags, story, setStory, storyId, setStoryId }) => {
+const MyEditor = ({
+  title,
+  tags,
+  story,
+  setStory,
+  storyId,
+  setStoryId,
+  coAuthors,
+  setCoAuthors,
+  isEdit,
+}) => {
   const editorRef = React.useRef();
 
   const handleSave = async () => {
     const markdownContent = editorRef.current.getInstance().getMarkdown();
-    console.log("Text typed: ", markdownContent);
 
     const jwtToken = localStorage.getItem("jwt");
-    console.log("JWT Token retrieved: ", jwtToken);
     const author = localStorage.getItem("author");
 
     if (!title.trim()) {
@@ -19,14 +28,13 @@ const MyEditor = ({ title, tags, story, setStory, storyId, setStoryId }) => {
       return;
     }
 
-    console.log("story object: ", story);
-
     const payload = {
       author,
       content: markdownContent,
       title: title,
       draft: false,
       tags: tags.length > 0 ? tags : [],
+      co_authors: coAuthors,
     };
 
     const postStory = async () => {
@@ -42,16 +50,15 @@ const MyEditor = ({ title, tags, story, setStory, storyId, setStoryId }) => {
 
         if (response.ok) {
           const data = await response.json();
-          console.log("Story created, story id is: ", data.id);
+          alert("Story saved");
           setStory(data);
-          setStoryId(data.id); 
+          setStoryId(data.id);
         } else {
-          console.log("Error creating story: ", response.statusText);
-          const errorData = await response.json();
-          console.log("Error details: ", errorData);
+          alert("Error saving story");
         }
       } catch (error) {
-        console.log("Error: ", error);
+        console.error("Error: ", error);
+        alert("Error saving story");
       }
     };
 
@@ -68,19 +75,18 @@ const MyEditor = ({ title, tags, story, setStory, storyId, setStoryId }) => {
 
         if (response.ok) {
           const data = await response.json();
-          console.log("Story updated, story id is: ", storyId);
+          alert("Story saved");
           setStory(data);
         } else {
-          console.log("Error updating story: ", response.statusText);
-          const errorData = await response.json();
-          console.log("Error details: ", errorData);
+          alert("Error saving story");
         }
       } catch (error) {
-        console.log("Error: ", error);
+        console.error("Error: ", error);
+        alert("Error saving story");
       }
     };
 
-    if (storyId) {
+    if (story && isEdit) {
       await putStory();
     } else {
       await postStory();
@@ -91,7 +97,7 @@ const MyEditor = ({ title, tags, story, setStory, storyId, setStoryId }) => {
     <div className="mde">
       <Editor
         ref={editorRef}
-        initialValue="Start writing your story here..."
+        initialValue={story?.content || "Start writing your story here..."}
         height="500px"
         initialEditType="markdown"
         previewStyle="vertical"
@@ -101,8 +107,16 @@ const MyEditor = ({ title, tags, story, setStory, storyId, setStoryId }) => {
   );
 };
 
-function SideBar({ title, setTitle, tags, setTags }) {
+const SideBar = ({
+  title,
+  setTitle,
+  tags,
+  setTags,
+  coAuthors,
+  setCoAuthors,
+}) => {
   const [currentTag, setCurrentTag] = React.useState("");
+  const [currentCoAuthor, setCurrentCoAuthor] = React.useState("");
 
   const handleTagKeyDown = (e) => {
     if (e.key === "Enter") {
@@ -116,6 +130,13 @@ function SideBar({ title, setTitle, tags, setTags }) {
 
   const removeTag = (indexToRemove) => {
     setTags(tags.filter((_, index) => index !== indexToRemove));
+  };
+
+  const handleAddCoAuthor = () => {
+    if (currentCoAuthor.trim()) {
+      setCoAuthors([...coAuthors, currentCoAuthor.trim()]);
+      setCurrentCoAuthor("");
+    }
   };
 
   return (
@@ -147,18 +168,42 @@ function SideBar({ title, setTitle, tags, setTags }) {
           value={currentTag}
           onChange={(e) => setCurrentTag(e.target.value)}
           onKeyDown={handleTagKeyDown}
-          placeholder="Enter tags"
+          placeholder="Tag name and Enter"
         />
+      </div>
+
+      <div className="co-author">
+        <h3>Co-Authors</h3>
+        <input
+          type="text"
+          value={currentCoAuthor}
+          onChange={(e) => setCurrentCoAuthor(e.target.value)}
+          placeholder="Enter co-author name"
+        />
+        <button onClick={handleAddCoAuthor}>Add</button>
+        <div>
+          {coAuthors.length > 0 && (
+            <ul>
+              {coAuthors.map((coAuthor, index) => (
+                <li key={index}>{coAuthor}</li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
     </div>
   );
-}
+};
 
 export default function Story() {
-  const [title, setTitle] = useState("");
-  const [tags, setTags] = useState([]);
-  const [story, setStory] = useState(null);
-  const [storyId, setStoryId] = useState(null);
+  const { state } = useLocation();
+  const { storyData, isEdit } = state || {};
+  console.log("Story Data: ", storyData);
+  const [title, setTitle] = useState(storyData?.metadata?.title || "");
+  const [tags, setTags] = useState(storyData?.metadata?.tags || []);
+  const [story, setStory] = useState(storyData || {});
+  const [storyId, setStoryId] = useState(storyData?._id || null);
+  const [coAuthors, setCoAuthors] = useState(storyData?.co_authors || []);
 
   return (
     <div>
@@ -167,6 +212,8 @@ export default function Story() {
         setTitle={setTitle}
         tags={tags}
         setTags={setTags}
+        coAuthors={coAuthors}
+        setCoAuthors={setCoAuthors}
       />
       <MyEditor
         title={title}
@@ -175,6 +222,9 @@ export default function Story() {
         setStory={setStory}
         storyId={storyId}
         setStoryId={setStoryId}
+        coAuthors={coAuthors}
+        setCoAuthors={setCoAuthors}
+        isEdit={isEdit}
       />
     </div>
   );
