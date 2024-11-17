@@ -52,14 +52,8 @@ const ViewStory = () => {
 
   return (
     <div className="view-story">
-      <div className="icons-container">
-        <button className="home-button" onClick={openHome}>
-          <FaHome size={30} />
-        </button>
-        <button className="profile-button" onClick={openProfile}>
-          <FaUserCircle size={30} />
-        </button>
-      </div>
+      <FaHome className="home-icon" onClick={openHome} size={30} />
+      <FaUserCircle className="profile-icon" onClick={openProfile} size={30} />
       <div className="story-header"></div>
       <div className="story-details">
         <h2>

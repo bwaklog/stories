@@ -4,54 +4,28 @@
     min-height: 100vh;
     font-family: 'Arial', sans-serif;
     color: #333;
+    position: relative;
 }
 
-.icons-container {
+.home-icon {
     position: fixed;
     top: 20px;
-    left: 0;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    padding: 0 16px;
-    z-index: 1000;
-}
-
-.home-button,
-.profile-button {
-    background: none;
-    border: none;
+    left: 20px;
     cursor: pointer;
-    font-size: 1.8em;
-    color: #444;
-    transition: color 0.3s ease;
+    color: #333;
 }
 
-.home-button:hover,
-.profile-button:hover {
-    color: #007BFF;
-    /* Slight highlight on hover */
+.profile-icon {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+    color: #333;
 }
 
 .story-header {
     margin: 40px 0 20px;
     text-align: center;
-}
-
-.story-header h1 {
-    font-size: 3em;
-    /* Increased font size */
-    font-weight: bold;
-    margin-bottom: 10px;
-    color: #222;
-}
-
-.story-header h2 {
-    font-size: 1.5em;
-    /* Slightly larger for subheadings */
-    font-weight: 400;
-    color: #555;
-    margin-top: 5px;
 }
 
 .story-details {
@@ -63,7 +37,6 @@
 
 .story-details h2 {
     font-size: 2em;
-    /* Increased font size for the title */
     font-weight: 600;
     margin-bottom: 10px;
     color: #222;
@@ -71,7 +44,6 @@
 
 .story-details .author-heading {
     font-size: 1.3em;
-    /* Increased font size for "Written By" */
     color: #555;
     margin-top: 5px;
 }
@@ -93,22 +65,17 @@
     margin-bottom: 15px;
 }
 
-.story-content p:last-child {
-    margin-bottom: 0;
-}
-
 button {
-    background-color: #333;
-    color: #fff;
-    border: none;
+    color: #333;
+    background-color: #fff;
+    border: 1px solid #333;
     padding: 8px 16px;
     font-size: 1em;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
 }
 
 button:hover {
-    background-color: #000;
+    background-color: #333;
     color: #fff;
 }
