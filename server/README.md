@@ -106,10 +106,10 @@ curl -X GET                                             \
 --header 'Authorization: Bearer jwt-token-of-the-user'  \
 http://localhost:<PORT>/tags
 
-# Get stories with tag tagname
-curl -X GET                                             \
---header 'Authorization: Bearer jwt-token-of-the-user'  \
-http://localhost:<PORT>/tags/tagname
+# Get stories with tag tagname (DEPRECATED)
+# curl -X GET                                             \
+# --header 'Authorization: Bearer jwt-token-of-the-user'  \
+# http://localhost:<PORT>/tags/tagname
 ```
 
 ---

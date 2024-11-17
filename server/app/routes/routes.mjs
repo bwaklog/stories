@@ -548,11 +548,50 @@ router.get("/stories", async (req, resp) => {
 
   if (req.query.tag) {
     let tag = req.query.tag;
+    let tags = tag.split(",");
     let collections = connect.db.collection("stories");
-    let stories = await collections.find({
-      "metadata.tags": tag,
-      "metadata.draft": false
-    }).toArray();
+    console.log(tag);
+
+    let jwt = auth.extractTokenFromHeader(req.header("Authorization"));
+    let jwt_user = await auth.verifyToken(jwt);
+
+    let query = {
+      $or: [
+        {
+          // show drafts and non drafts if requester
+          // is the author or co_author
+          $and: [
+            { "metadata.tags": { $all: tags } },
+            {
+              $or: [
+                { "author": jwt_user.username },
+                { "co_authors": jwt_user.username }
+              ]
+            }
+          ]
+        },
+        {
+          // show only non drafts if requester is not the author or co_author
+          $and: [
+            { "metadata.tags": { $all: tags } },
+            { "metadata.draft": false},
+            {
+              $or: [
+                { "author": { $ne: jwt_user.username } },
+                { "co_authors": { $ne: jwt_user.username } }
+              ]
+            }
+          ]
+        },
+      ]
+    }
+
+    // let stories = await collections.find({
+    //   "metadata.tags": { $all: tags },
+    //   "metadata.draft": false
+    // }).toArray();
+
+    let stories = await collections.find(query).toArray();
     if (stories.length === 0) {
       resp.status(404).send({ error: "Stories not found" });
       return;
@@ -595,9 +634,38 @@ router.get("/authors", async (req, resp) => {
 
 router.get("/tags", async (req, resp) => {
   let collections = connect.db.collection("stories");
-  let stories = await collections.find({
-    "metadata.draft": false
-  }).toArray();
+
+  let jwt = auth.extractTokenFromHeader(req.header("Authorization"));
+  let jwt_user = await auth.verifyToken(jwt);
+
+  let query = {
+    $or: [
+      // list of tags (including drafts) where the requester is the author or co_author
+      {
+        $or: [
+          { "author": jwt_user.username },
+          { "co_authors": jwt_user.username }
+        ]
+      },
+      // list of tags (no drafts) where the requester is not the author or co_author 
+      {
+        $and: [
+          {"metadata.draft": false},
+          {
+            $or: [
+              { "author": { $ne: jwt_user.username } },
+              { "co_authors": { $ne: jwt_user.username } }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+
+  // let stories = await collections.find({
+  //   "metadata.draft": false
+  // }).toArray();
+  let stories = await collections.find(query).toArray();
 
   if (stories.length === 0) {
     resp.status(404).send({ error: "Stories not found" });
@@ -621,18 +689,18 @@ router.get("/tags", async (req, resp) => {
 
 // Fetch all stories by tag
 // tags is an array part of metadata and case insensitive
-router.get("/tags/:tag", async (req, resp) => {
-  let tag = req.params.tag;
-  let collections = connect.db.collection("stories");
-  let stories = await collections.find({
-    "metadata.tags": tag,
-    "metadata.draft": false
-  }).toArray();
-  if (stories.length === 0) {
-    resp.status(404).send({ error: "Stories not found" });
-  } else {
-    resp.status(200).send(stories);
-  }
-})
+// router.get("/tags/:tag", async (req, resp) => {
+//   let tag = req.params.tag;
+//   let collections = connect.db.collection("stories");
+//   let stories = await collections.find({
+//     "metadata.tags": tag,
+//     "metadata.draft": false
+//   }).toArray();
+//   if (stories.length === 0) {
+//     resp.status(404).send({ error: "Stories not found" });
+//   } else {
+//     resp.status(200).send(stories);
+//   }
+// })
 
 export default router;
