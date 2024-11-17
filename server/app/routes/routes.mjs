@@ -187,8 +187,79 @@ router.post("/login", checkSchema(schema.userLoginSchema), async (req, resp) => 
     });
     return;
   }
-
 });
+
+router.delete('/user/destructive/delete', async (req, resp) => {
+  let collections = connect.db.collection("users");
+  let jwt = auth.extractTokenFromHeader(req.header("Authorization"));
+  let jwt_user = await auth.verifyToken(jwt);
+
+  let username = jwt_user.username;
+  let db_id = jwt_user._id;
+  let user_delete_query = { _id: ObjectId.createFromHexString(db_id) };
+
+  let result = await collections.deleteOne(user_delete_query);
+  if (!result) {
+    resp.status(400).send({ error: "Failed to delete user. User not found" });
+    return;
+  }
+
+  // all posts authored by user without co_authors
+  let story_collections = connect.db.collection("stories");
+
+  let no_co_author_query = {
+    $and: [
+      { author: username },
+      { co_authors: { $size: 0 } }
+    ]
+  };
+  let co_authored_query = {
+    $and: [
+      { author: username },
+      { co_authors: { $size: { $gt: 0 } } }
+    ]
+  };
+  let only_co_author_query = { co_authors: username };
+
+  // safe to delete without transfer of ownership
+  let no_co_author_result = await story_collections.deleteMany(no_co_author_query);
+  if (!no_co_author_result) {
+    resp.status(400).send({ error: "Failed to delete user stories" });
+    return;
+  }
+
+  // transfer ownership to first co_author
+  let co_authored_stories = await story_collections.find(co_authored_query).toArray();
+  if (co_authored_stories.length !== 0) {
+    for (let story in co_authored_stories) {
+      story.author = story.co_authors[0];
+      // update 
+      let update_query = { _id: story._id };
+      let update_result = await story_collections.updateOne(update_query, story);
+      if (!update_result) {
+        resp.status(400).send({ error: "Failed to transfer ownership of co-authored stories" });
+        return;
+      }
+    }
+  }
+
+  let only_co_author_result = await story_collections.find(only_co_author_query).toArray();
+  if (only_co_author_result.length !== 0) {
+    for (let story in only_co_author_result) {
+      // remove the author to be delete from co_authors
+      let co_authors = story.co_authors.filter(co_auth => co_auth !== username);
+      story.co_authors = co_authors;
+      let update_query = { _id: story._id };
+      let update_result = await story_collections.updateOne(update_query, story);
+      if (!update_result) {
+        resp.status(400).send({ error: "Failed to remove user from co-authors" });
+        return;
+      }
+    }
+  }
+
+  resp.status(200).send({ message: "User deleted sucessfully" });
+})
 
 router.get('/users/', async (req, resp) => {
   let collections = connect.db.collection("users");
@@ -574,7 +645,7 @@ router.get("/stories", async (req, resp) => {
           // show only non drafts if requester is not the author or co_author
           $and: [
             { "metadata.tags": { $all: tags } },
-            { "metadata.draft": false},
+            { "metadata.draft": false },
             {
               $or: [
                 { "author": { $ne: jwt_user.username } },
@@ -650,7 +721,7 @@ router.get("/tags", async (req, resp) => {
       // list of tags (no drafts) where the requester is not the author or co_author 
       {
         $and: [
-          {"metadata.draft": false},
+          { "metadata.draft": false },
           {
             $or: [
               { "author": { $ne: jwt_user.username } },

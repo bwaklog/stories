@@ -29,6 +29,14 @@ http://localhost:<PORT>/login   \
 }'
 ```
 
+4. Delete a user (NOT-TESTED): This will delete the user from the `user` collection. For each story authored by the user without a co-author will be deleted, and for the stories with co-authors, the first co-author will be promoted to the author(owner). If the user is one of the co-authors, then the user will be removed from the co-authors list.
+
+```bash
+curl -X DELETE                                          \
+--header "Authorization: Bearer jwt-token-of-the-user"  \
+http://localhost:<PORT>//user/destructive/delete        \
+```
+
 3. Create a story
 
 ```bash

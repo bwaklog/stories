@@ -53,6 +53,18 @@ const userLoginSchema = {
     }
 }
 
+const deleteUserRequest = {
+    // jwt should do the job
+    // id: {
+    //     notEmpty: true,
+    //     isString: true,
+    //     isLength: {
+    //         options: { min: 24, max: 24 }
+    //     },
+    //     errorMessage: "Invalid user id"
+    // }
+}
+
 const newStorySchemaRequest = {
     co_authors: {
         optional: true,
