@@ -3,9 +3,8 @@ import React, { useState } from "react";
 import { Editor } from "@toast-ui/react-editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
 
-const MyEditor = ({ title, tags }) => {
+const MyEditor = ({ title, tags, story, setStory, storyId, setStoryId }) => {
   const editorRef = React.useRef();
-  const [story, setStory] = useState(null);
 
   const handleSave = async () => {
     const markdownContent = editorRef.current.getInstance().getMarkdown();
@@ -22,34 +21,69 @@ const MyEditor = ({ title, tags }) => {
 
     console.log("story object: ", story);
 
-    try {
-      const response = await fetch("http://localhost:4000/stories", {
-        method: story ? "PUT" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${jwtToken}`,
-        },
-        body: JSON.stringify({
-          id: story ? story.id : null,
-          author: author,
-          content: markdownContent,
-          title: title,
-          draft: false,
-          tags: tags.length > 0 ? tags : [],
-        }),
-      });
+    const payload = {
+      author,
+      content: markdownContent,
+      title: title,
+      draft: false,
+      tags: tags.length > 0 ? tags : [],
+    };
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Content saved: ", data);
-        setStory(data);
-      } else {
-        console.log("Error saving content: ", response.statusText);
-        const errorData = await response.json();
-        console.log("Error details: ", errorData);
+    const postStory = async () => {
+      try {
+        const response = await fetch("http://localhost:4000/stories", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${jwtToken}`,
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Story created, story id is: ", data.id);
+          setStory(data);
+          setStoryId(data.id); 
+        } else {
+          console.log("Error creating story: ", response.statusText);
+          const errorData = await response.json();
+          console.log("Error details: ", errorData);
+        }
+      } catch (error) {
+        console.log("Error: ", error);
       }
-    } catch (error) {
-      console.log("Error: ", error);
+    };
+
+    const putStory = async () => {
+      try {
+        const response = await fetch(`http://localhost:4000/stories`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${jwtToken}`,
+          },
+          body: JSON.stringify({ ...payload, id: storyId }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Story updated, story id is: ", storyId);
+          setStory(data);
+        } else {
+          console.log("Error updating story: ", response.statusText);
+          const errorData = await response.json();
+          console.log("Error details: ", errorData);
+        }
+      } catch (error) {
+        console.log("Error: ", error);
+      }
+    };
+
+    if (storyId) {
+      await putStory();
+    } else {
+      await postStory();
     }
   };
 
@@ -123,6 +157,9 @@ function SideBar({ title, setTitle, tags, setTags }) {
 export default function Story() {
   const [title, setTitle] = useState("");
   const [tags, setTags] = useState([]);
+  const [story, setStory] = useState(null);
+  const [storyId, setStoryId] = useState(null);
+
   return (
     <div>
       <SideBar
@@ -131,7 +168,14 @@ export default function Story() {
         tags={tags}
         setTags={setTags}
       />
-      <MyEditor title={title} tags={tags} />
+      <MyEditor
+        title={title}
+        tags={tags}
+        story={story}
+        setStory={setStory}
+        storyId={storyId}
+        setStoryId={setStoryId}
+      />
     </div>
   );
 }
