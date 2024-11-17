@@ -1,12 +1,12 @@
 import React from "react";
 import { FaUserCircle } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
-import { useLocation } from "react-router-dom"; // Import useLocation hook
+import { useLocation } from "react-router-dom"; 
 import "../ViewStory.css";
 
 const ViewStory = () => {
-  const { state } = useLocation(); // Get the passed state
-  const { storyData } = state || {}; // Destructure story data
+  const { state } = useLocation(); 
+  const { storyData } = state || {}; 
 
   if (!storyData) {
     return <div>No story data available</div>;
