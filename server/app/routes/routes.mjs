@@ -587,6 +587,11 @@ router.get("/stories", async (req, resp) => {
   if (req.query.id) {
     console.log(req.query.id);
 
+    if (req.query.id.length !== 24) {
+      resp.status(400).send({ error: "The story id is not a valid one. Bad format" });
+      return;
+    }
+
     let jwt = auth.extractTokenFromHeader(req.header("Authorization"));
     let jwt_user = await auth.verifyToken(jwt);
     if (jwt_user === null) {
