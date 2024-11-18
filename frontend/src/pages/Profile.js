@@ -73,7 +73,7 @@ const Profile = () => {
   };
 
   const handleStoryClick = (storyData) => {
-    navigate("/viewstory", { state: { storyData } });
+    navigate(`/viewstory/${storyData.id}`, { state: { storyData } });
   };
 
   return (
