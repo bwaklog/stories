@@ -21,7 +21,7 @@ function App() {
       <Route path="/home" element={<RouteProtection><Home /></RouteProtection>} /> 
       <Route path="/story" element={<RouteProtection><Story /></RouteProtection>} /> 
       <Route path="/profile" element={<RouteProtection><Profile /></RouteProtection>} /> 
-      <Route path="/viewStory" element={<RouteProtection><ViewStory /></RouteProtection>} />
+      <Route path="/viewStory/:storyId" element={<RouteProtection><ViewStory /></RouteProtection>} />
       <Route path="/search" element={<RouteProtection><Search /></RouteProtection>} />
       </Routes>
     </Router>

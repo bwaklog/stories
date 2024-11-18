@@ -1,15 +1,52 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FaHome, FaUserCircle } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import "../ViewStory.css";
 
 const ViewStory = () => {
+  const { storyId } = useParams();
   const { state } = useLocation();
   const { storyData } = state || {};
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [storydata, setstorydata] = React.useState(null);
   const navigate = useNavigate();
 
-  if (!storyData) {
+  useEffect(() => {
+    const fetchStory = async () => {
+      try {
+        console.log("storyId: ", storyId);
+        const response = await fetch(`http://localhost:4000/stories?id=${storyId}`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${localStorage.getItem("jwt")}`,
+          }
+        });
+        console.log("response: ", response);
+        if (response.ok) {
+          const data = await response.json();
+          setstorydata(Array.isArray(data) ? data[0] : data);
+        } else {
+          console.error("Error fetching story data.");
+          setstorydata(null);
+        }
+      } catch (error) {
+        console.error("Error: ", error);
+        setstorydata(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    fetchStory();
+  }, [storyId]);
+  
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!storydata) {
     return <div>No story data available</div>;
   }
 
@@ -57,13 +94,13 @@ const ViewStory = () => {
       <div className="story-header"></div>
       <div className="story-details">
         <h2>
-          <strong>{storyData.metadata.title}</strong>
+          <strong>{storydata.metadata.title}</strong>
         </h2>
-        <h3 className="author-heading">Written By: {storyData.author}</h3>
+        <h3 className="author-heading">Written By: {storydata.author}</h3>
         {editStory()}
       </div>
       <div className="story-content">
-        <ReactMarkdown>{storyData.content}</ReactMarkdown>
+        <ReactMarkdown>{storydata.content}</ReactMarkdown>
       </div>
     </div>
   );

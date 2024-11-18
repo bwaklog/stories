@@ -82,7 +82,7 @@ function MainContent({ selectedTags }) {
         const data = await response.json();
 
         if (Array.isArray(data)) {
-          setStories(data); // Directly set all the stories returned by API
+          setStories(data); 
         } else {
           console.error("Data returned is not an array:", data);
           setStories([]);
@@ -96,7 +96,8 @@ function MainContent({ selectedTags }) {
   }, [selectedTags]);
 
   const viewStory = (storyData) => {
-    navigate("/viewStory", { state: { storyData } });
+    console.log(storyData);
+    navigate(`/viewStory/${storyData._id}`, { state: { storyData } });
   };
 
   return (
