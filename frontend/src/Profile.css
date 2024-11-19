@@ -62,14 +62,38 @@ h2 {
 }
 
 .stories-container li {
-    border: 1px solid #ddd;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    background: #ffffff;
+    height: 300px;
+    border: 1px solid #e0e0e0;
+    padding: 2vh 2vw;
+    padding-bottom: 3vh;
+    margin-bottom: 2vh;
+    border-radius: 0.5rem;
+    background: #fff;
     font-size: 16px;
     cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+.stories-container li::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3vh;
+    background: linear-gradient(transparent, #fff);
+}
+
+.stories-container li p {
+    margin: 0;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .stories-container li:hover {

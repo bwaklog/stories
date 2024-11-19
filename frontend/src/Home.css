@@ -102,18 +102,42 @@ button:hover {
 }
 
 .card-container div {
+   height: 300px;
+   /* Fixed height instead of max-height */
    border: 1px solid #e0e0e0;
    border-radius: 0.5rem;
    padding: 2vh 2vw;
+   padding-bottom: 3vh;
    margin-bottom: 2vh;
    background: #fff;
    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
    transition: transform 0.2s ease, box-shadow 0.3s ease;
+   overflow: hidden;
+   position: relative;
+}
+
+.card-container div::after {
+   content: '';
+   position: absolute;
+   bottom: 0;
+   left: 0;
+   right: 0;
+   height: 3vh;
+   background: linear-gradient(transparent, #fff);
+}
+
+.card-container div p {
+   margin: 0;
+   line-height: 1.5;
+   display: -webkit-box;
+   -webkit-box-orient: vertical;
+   overflow: hidden;
+   text-overflow: ellipsis;
 }
 
 .card-container div:hover {
    cursor: pointer;
-   transform: scale(1.03);
+   transform: scale(1.015);
    box-shadow: 0 0.75rem 1.25rem rgba(0, 0, 0, 0.2);
 }
 

@@ -16,7 +16,6 @@
    margin-left: 65px;
    overflow-y: scroll;
    scrollbar-width: thin;
-
 }
 
 .sidebar h4 {
@@ -234,6 +233,31 @@
 }
 
 .draft {
+   margin-top: 30px;
    display: flex;
    flex-direction: row;
+   align-items: center;
+   justify-content: flex-start;
+   gap: 0.5rem;
+   padding: 0.5rem 1rem;
+   width: 100%;
+   background: #f9f9f9;
+   border: 1px solid #ddd;
+   border-radius: 8px;
+   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.draft h3 {
+   font-size: 20px;
+   font-weight: 600;
+   color: #333;
+   margin: 0;
+}
+
+.draft input[type="checkbox"] {
+   width: 30px;
+   height: 30px;
+   margin-left: 70px;
+   accent-color: #333;
+   cursor: pointer;
 }
