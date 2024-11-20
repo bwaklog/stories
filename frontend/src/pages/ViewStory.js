@@ -67,7 +67,7 @@ const ViewStory = () => {
       return (
         <button
           onClick={() => {
-            navigate("/story", { state: { storyData, isEdit: true } });
+            navigate("/story", { state: { storyData, isEditFromView: true } });
           }}
         >
           Edit as co-author
