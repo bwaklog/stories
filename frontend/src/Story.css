@@ -146,12 +146,16 @@
    text-align: center;
 }
 
-.co-authors-container h4 {
-   font-size: 1.4rem;
-   font-weight: 600;
-   color: #333;
-   margin-bottom: 12px;
+.co-author {
    text-align: center;
+}
+
+.co-author h4 {
+   font-size: 1rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 12px;
+      text-align: center;
 }
 
 .co-author-item {
@@ -161,8 +165,7 @@
    font-size: 0.8rem;
    display: inline-flex;
    align-items: center;
-   justify-content: center;
-   text-align: center;
+   justify-content: space-between;
 }
 
 .remove-co-author {
@@ -188,7 +191,6 @@
    color: #333;
    transition: border-color 0.3s ease, background-color 0.3s ease;
    margin-top: 8px;
-   text-align: center;
 }
 
 .co-author-input:focus {
@@ -199,7 +201,7 @@
 
 .co-author-input::placeholder {
    color: #bbb;
-   text-align: center;
+   font-size: 13px;
 }
 
 .icons {
