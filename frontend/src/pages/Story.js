@@ -98,7 +98,7 @@ const MyEditor = ({
       } else {
          await postStory();
       }
-   };
+   };   
 
    return (
       <div className="mde">
@@ -152,7 +152,7 @@ const SideBar = ({
    const handleDraftChange = (e) => {
       console.log("ticked? : ", e.target.checked);
       setDraft(e.target.checked);
-   }
+   };
 
    return (
      <div className="sidebar">
