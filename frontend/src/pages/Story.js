@@ -16,6 +16,8 @@ const MyEditor = ({
    coAuthors,
    setCoAuthors,
    isEdit,
+   setIsEdit,
+   draft,
 }) => {
    const editorRef = React.useRef();
 
@@ -34,7 +36,7 @@ const MyEditor = ({
          author,
          content: markdownContent,
          title: title,
-         draft: false,
+         draft: draft,
          tags: tags.length > 0 ? tags : [],
          co_authors: coAuthors,
       };
@@ -55,7 +57,7 @@ const MyEditor = ({
                alert("Story saved");
                setStory(data);
                setStoryId(data.id);
-               console.log("Data: ", data);
+               setIsEdit(true);
             } else {
                alert("Error saving story");
             }
@@ -119,6 +121,8 @@ const SideBar = ({
    setTags,
    coAuthors,
    setCoAuthors,
+   draft,
+   setDraft,
 }) => {
    const [currentTag, setCurrentTag] = React.useState("");
    const [currentCoAuthor, setCurrentCoAuthor] = React.useState("");
@@ -144,6 +148,11 @@ const SideBar = ({
          setCurrentCoAuthor("");
       }
    };
+
+   const handleDraftChange = (e) => {
+      console.log("ticked? : ", e.target.checked);
+      setDraft(e.target.checked);
+   }
 
    return (
      <div className="sidebar">
@@ -219,7 +228,7 @@ const SideBar = ({
        </div>
        <div className="draft">
          <h3>Draft?</h3>
-         <input type="checkbox" />
+         <input type="checkbox" id="draft-checkbox" onChange={handleDraftChange}/>
        </div>
      </div>
    );
@@ -227,12 +236,13 @@ const SideBar = ({
 
 export default function Story() {
    const { state } = useLocation();
-   const { storyData, isEdit } = state || {};
-   console.log("Story Data: ", storyData);
+   const { storyData } = state || {};
    const [title, setTitle] = useState(storyData?.metadata?.title || "");
    const [tags, setTags] = useState(storyData?.metadata?.tags || []);
+   const [isEdit, setIsEdit] = useState(false);
    const [story, setStory] = useState(storyData || {});
    const [storyId, setStoryId] = useState(storyData?.id || null);
+   const [draft, setDraft] = useState(false);
    const [coAuthors, setCoAuthors] = useState(storyData?.co_authors || []);
 
    return (
@@ -244,6 +254,10 @@ export default function Story() {
             setTags={setTags}
             coAuthors={coAuthors}
             setCoAuthors={setCoAuthors}
+            draft={draft}
+            setDraft={setDraft}
+            isEdit={isEdit}
+            setIsEdit={setIsEdit}
          />
          <MyEditor
             title={title}
@@ -255,6 +269,8 @@ export default function Story() {
             coAuthors={coAuthors}
             setCoAuthors={setCoAuthors}
             isEdit={isEdit}
+            setIsEdit={setIsEdit}
+            draft={draft}
          />
       </div>
    );
