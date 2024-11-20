@@ -3,8 +3,6 @@ import React, { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { useNavigate } from "react-router-dom";
 
-const tags = ["Personal", "Adventure", "Fun", "Sad", "Happy", "Kid Friendly"];
-
 function handleLogout() {
   localStorage.removeItem("jwt");
   localStorage.removeItem("author");
@@ -40,6 +38,32 @@ function LeftSideBar() {
 }
 
 function RightSideBar({ selectedTags, toggleTag }) {
+  const [tags, setTags] = useState([]);
+
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const response = await fetch("http://localhost:4000/tags", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+          },
+        });
+
+        if (response.ok) {
+          const fetchedTags = await response.json();
+          setTags(fetchedTags);
+        } else {
+          console.error("Failed to fetch tags");
+        }
+      } catch (error) {
+        console.error("Error fetching tags:", error);
+      }
+    };
+
+    fetchTags();
+  }, []);
+
   return (
     <div className="right-sidebar">
       <h3 style={{ margin: 0, marginBottom: 5 }}>Mini Tags Explorer</h3>
@@ -97,7 +121,7 @@ function MainContent({ selectedTags }) {
 
   const viewStory = (storyData) => {
     console.log(storyData);
-    navigate(`/viewStory/${storyData._id}`, { state: { storyData } });
+    navigate(`/viewStory/${storyData.id}`, { state: { storyData } });
   };
 
   return (
@@ -126,8 +150,8 @@ export default function Home() {
     setSelectedTags(
       (prevSelectedTags) =>
         prevSelectedTags.includes(tag)
-          ? prevSelectedTags.filter((t) => t !== tag) // Deselect tag
-          : [...prevSelectedTags, tag] // Select tag
+          ? prevSelectedTags.filter((t) => t !== tag)
+          : [...prevSelectedTags, tag]
     );
   };
 

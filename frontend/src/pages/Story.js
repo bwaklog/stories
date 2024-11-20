@@ -55,6 +55,7 @@ const MyEditor = ({
                alert("Story saved");
                setStory(data);
                setStoryId(data.id);
+               console.log("Data: ", data);
             } else {
                alert("Error saving story");
             }
@@ -66,6 +67,7 @@ const MyEditor = ({
 
       const putStory = async () => {
          try {
+            console.log("id that we're getting in put: ", storyId);
             const response = await fetch(`http://localhost:4000/stories`, {
                method: "PUT",
                headers: {
@@ -81,6 +83,7 @@ const MyEditor = ({
                setStory(data);
             } else {
                alert("Error saving story");
+               console.log("response:" + response.json());
             }
          } catch (error) {
             console.error("Error: ", error);
@@ -216,7 +219,7 @@ export default function Story() {
    const [title, setTitle] = useState(storyData?.metadata?.title || "");
    const [tags, setTags] = useState(storyData?.metadata?.tags || []);
    const [story, setStory] = useState(storyData || {});
-   const [storyId, setStoryId] = useState(storyData?._id || null);
+   const [storyId, setStoryId] = useState(storyData?.id || null);
    const [coAuthors, setCoAuthors] = useState(storyData?.co_authors || []);
 
    return (

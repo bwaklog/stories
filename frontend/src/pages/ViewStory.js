@@ -63,6 +63,7 @@ const ViewStory = () => {
   function editStory() {
     const coAuthors = Array.isArray(storyData.co_authors) ? storyData.co_authors : [];
     if (coAuthors.includes(currentUser) && storyData.co_author !== null) {
+      console.log("id: ", storyData.id);
       return (
         <button
           onClick={() => {
@@ -74,6 +75,7 @@ const ViewStory = () => {
       );
     } else {
       if (currentUser === storyData.author) {
+        console.log("id: ", storyData.id);
         return (
           <button
             onClick={() => {
