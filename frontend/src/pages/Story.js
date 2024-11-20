@@ -125,6 +125,7 @@ const SideBar = ({
   setCoAuthors,
   draft,
   setDraft,
+  storyId
 }) => {
   const [currentTag, setCurrentTag] = React.useState("");
   const [currentCoAuthor, setCurrentCoAuthor] = React.useState("");
@@ -155,13 +156,21 @@ const SideBar = ({
     setDraft(e.target.checked);
   };
 
+  async function copyToClipboard() {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/viewStory/${storyId}`);
+    } catch (err) {
+      alert(err);
+    }
+  }
+
   return (
     <div className="sidebar">
       <div className="icons">
         <FaHome onClick={() => navigate("/home")} className="home-icon" />
         <FaUserCircle onClick={() => navigate("/profile")} className="profile-icon" />
       </div>
-      <button className="share">Share</button>
+      <button className="share" onClick={copyToClipboard}>Share</button>
       <div className="title-input">
         <h4>Story Title</h4>
         <input
@@ -234,14 +243,14 @@ const SideBar = ({
 
 export default function Story() {
   const { state } = useLocation();
-  const { storyData, isEditFromView = true } = state || {};
-  const [title, setTitle] = useState(storyData?.metadata?.title || "");
-  const [tags, setTags] = useState(storyData?.metadata?.tags || []);
+  const { storydata, isEditFromView = true } = state || {};
+  const [title, setTitle] = useState(storydata?.metadata?.title || "");
+  const [tags, setTags] = useState(storydata?.metadata?.tags || []);
   const [isEdit, setIsEdit] = useState(false);
-  const [story, setStory] = useState(storyData || {});
-  const [storyId, setStoryId] = useState(storyData?.id || null);
+  const [story, setStory] = useState(storydata || {});
+  const [storyId, setStoryId] = useState(storydata?.id || null);
   const [draft, setDraft] = useState(false);
-  const [coAuthors, setCoAuthors] = useState(storyData?.co_authors || []);
+  const [coAuthors, setCoAuthors] = useState(storydata?.co_authors || []);
 
   return (
     <div>
@@ -256,6 +265,7 @@ export default function Story() {
         setDraft={setDraft}
         isEdit={isEdit}
         setIsEdit={setIsEdit}
+        storyId={storyId}
       />
       <MyEditor
         title={title}

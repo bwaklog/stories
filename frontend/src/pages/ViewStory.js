@@ -7,7 +7,7 @@ import "../ViewStory.css";
 const ViewStory = () => {
   const { storyId } = useParams();
   const { state } = useLocation();
-  const { storyData } = state || {};
+  // const { storydata } = state || {};
   const [isLoading, setIsLoading] = React.useState(true);
   const [storydata, setstorydata] = React.useState(null);
   const navigate = useNavigate();
@@ -37,10 +37,10 @@ const ViewStory = () => {
         setIsLoading(false);
       }
     };
-  
+
     fetchStory();
   }, [storyId]);
-  
+
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -61,25 +61,25 @@ const ViewStory = () => {
   const currentUser = localStorage.getItem("author");
 
   function editStory() {
-    const coAuthors = Array.isArray(storyData.co_authors) ? storyData.co_authors : [];
-    if (coAuthors.includes(currentUser) && storyData.co_author !== null) {
-      console.log("id: ", storyData.id);
+    const coAuthors = Array.isArray(storydata.co_authors) ? storydata.co_authors : [];
+    if (coAuthors.includes(currentUser) && storydata.co_author !== null) {
+      console.log("id: ", storydata.id);
       return (
         <button
           onClick={() => {
-            navigate("/story", { state: { storyData, isEditFromView: true } });
+            navigate("/story", { state: { storydata, isEditFromView: true } });
           }}
         >
           Edit as co-author
         </button>
       );
     } else {
-      if (currentUser === storyData.author) {
-        console.log("id: ", storyData.id);
+      if (currentUser === storydata.author) {
+        console.log("id: ", storydata.id);
         return (
           <button
             onClick={() => {
-              navigate("/story", { state: { storyData, isEdit: true } });
+              navigate("/story", { state: { storydata, isEdit: true } });
             }}
           >
             Edit
