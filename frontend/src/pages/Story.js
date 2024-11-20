@@ -146,69 +146,82 @@ const SideBar = ({
    };
 
    return (
-      <div className="sidebar">
-         <div className="icons">
-            <FaHome onClick={() => navigate("/home")} className="home-icon" />
-            <FaUserCircle
-               onClick={() => navigate("/profile")}
-               className="profile-icon"
-            />
+     <div className="sidebar">
+       <div className="icons">
+         <FaHome onClick={() => navigate("/home")} className="home-icon" />
+         <FaUserCircle
+           onClick={() => navigate("/profile")}
+           className="profile-icon"
+         />
+       </div>
+       <button className="share">Share</button>
+       <div className="title-input">
+         <h4>Story Title</h4>
+         <input
+           required
+           type="text"
+           value={title}
+           onChange={(e) => setTitle(e.target.value)}
+           placeholder="Enter story title"
+         />
+         <h4>Tags</h4>
+         <div className="tags-container">
+           {tags.map((tag, index) => (
+             <span key={index} className="tag">
+               {tag}{" "}
+               <button onClick={() => removeTag(index)} className="remove-tag">
+                 &times;
+               </button>
+             </span>
+           ))}
          </div>
-         <button className="share">Share</button>
-         <div className="title-input">
-            <h4>Story Title</h4>
-            <input
-               required
-               type="text"
-               value={title}
-               onChange={(e) => setTitle(e.target.value)}
-               placeholder="Enter story title"
-            />
-            <h4>Tags</h4>
-            <div className="tags-container">
-               {tags.map((tag, index) => (
-                  <span key={index} className="tag">
-                     {tag}{" "}
-                     <button onClick={() => removeTag(index)} className="remove-tag">
-                        &times;
-                     </button>
-                  </span>
-               ))}
-            </div>
-            <input
-               type="text"
-               className="tag-input"
-               value={currentTag}
-               onChange={(e) => setCurrentTag(e.target.value)}
-               onKeyDown={handleTagKeyDown}
-               placeholder="Tag name and Enter"
-            />
-         </div>
+         <input
+           type="text"
+           className="tag-input"
+           value={currentTag}
+           onChange={(e) => setCurrentTag(e.target.value)}
+           onKeyDown={handleTagKeyDown}
+           placeholder="Tag name and Enter"
+         />
+       </div>
 
-         <div className="co-author">
-            <h4 stlye={{ marginBottom: 10 }}>Co-Authors</h4>
-            <div className="co-author-box">
-               {coAuthors.length > 0 && (
-                  <ul>
-                     {coAuthors.map((coAuthor, index) => (
-                        <li key={index}>{coAuthor}</li>
-                     ))}
-                  </ul>
-               )}
-            </div>
-            <input
-               type="text"
-               value={currentCoAuthor}
-               onChange={(e) => setCurrentCoAuthor(e.target.value)}
-               placeholder="Enter co-author name"
-            />
-            <button onClick={handleAddCoAuthor}>Add</button>
+       <div className="co-author">
+         <h4>Co-Authors</h4>
+         <div className="co-authors-container">
+           {coAuthors.map((coAuthor, index) => (
+             <span key={index} className="co-author-item">
+               {coAuthor}{" "}
+               <button
+                 onClick={() =>
+                   setCoAuthors(coAuthors.filter((_, i) => i !== index))
+                 }
+                 className="remove-co-author"
+               >
+                 &times;
+               </button>
+             </span>
+           ))}
          </div>
-         <div className="draft">
-            <h3>Draft?</h3>
-            <input type="checkbox" />
-         </div>
-      </div>
+         <input
+           type="text"
+           className="co-author-input"
+           value={currentCoAuthor}
+           onChange={(e) => setCurrentCoAuthor(e.target.value)}
+           onKeyDown={(e) => {
+             if (e.key === "Enter" && currentCoAuthor.trim()) {
+               e.preventDefault();
+               setCoAuthors([...coAuthors, currentCoAuthor.trim()]);
+               setCurrentCoAuthor("");
+             }
+           }}
+           placeholder="Co-author name and Enter"
+         />
+       </div>
+       <div className="draft">
+         <h3>Draft?</h3>
+         <input type="checkbox" />
+       </div>
+     </div>
    );
 };
 

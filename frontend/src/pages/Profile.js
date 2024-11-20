@@ -99,7 +99,7 @@ const Profile = () => {
         <h1>Stories Written</h1>
         {userData.stories.length > 0 ? (
           <ul>
-            {userData.stories.map((story, index) => (
+            {[...userData.stories].reverse().map((story, index) => (
               <li key={index} onClick={() => handleStoryClick(story)}>
                 <h3>{story.metadata.title}</h3>
                 <p>{story.content}</p>

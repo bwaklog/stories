@@ -127,7 +127,7 @@ function MainContent({ selectedTags }) {
   return (
     <div className="card-container">
       {stories.length > 0 ? (
-        stories.map((story, index) => (
+        [...stories].reverse().map((story, index) => (
           <div key={index} onClick={() => viewStory(story)}>
             <h3>{story.metadata.title}</h3>
             <p>
