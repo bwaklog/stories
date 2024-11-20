@@ -698,13 +698,35 @@ router.get("/stories", async (req, resp) => {
     resp.status(404).send({ error: "Stories not found" });
     return;
   } else {
-    resp.status(200).send(stories);
+    console.log("here")
+    const filteredStories = stories.map(story => ({
+      id: story._id,
+      author: story.author,
+      co_authors: story.co_authors,
+      metadata: story.metadata,
+      content: story.content
+    }));
+    console.log(filteredStories)
+    resp.status(200).send(filteredStories);
   }
 })
 
 router.get("/authors", async (req, resp) => {
   let collections = connect.db.collection("users");
 
+  let users = await collections.find().toArray();
+  console.log(users);
+  if (users.length === 0) {
+    resp.status(404).send({ error: "Stories not found" });
+    return;
+  }
+  let filteredUsers = users.map(user => ({
+    id: user._id,
+    username: user.username, 
+    email: user.email
+  }))
+
+  resp.status(200).send(filteredUsers);
 })
 
 
